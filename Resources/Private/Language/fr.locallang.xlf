@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="fr" datatype="plaintext" original="messages" date="2025-01-01T00:00:00Z" product-name="semantic_suggestion_solr">
+        <header/>
+        <body>
+            <trans-unit id="plugin.title" resname="plugin.title">
+                <source>Similar content (Solr)</source>
+                <target>Contenus similaires (Solr)</target>
+            </trans-unit>
+            <trans-unit id="heading" resname="heading">
+                <source>Related content</source>
+                <target>Contenus similaires</target>
+            </trans-unit>
+            <trans-unit id="button.view" resname="button.view">
+                <source>Read more</source>
+                <target>Voir</target>
+            </trans-unit>
+            <trans-unit id="score.label" resname="score.label">
+                <source>Relevance</source>
+                <target>Score de similarite</target>
+            </trans-unit>
+            <trans-unit id="type.pages" resname="type.pages">
+                <source>Page</source>
+                <target>Page</target>
+            </trans-unit>
+            <trans-unit id="type.tx_news_domain_model_news" resname="type.tx_news_domain_model_news">
+                <source>News</source>
+                <target>Actualite</target>
+            </trans-unit>
+            <trans-unit id="flexform.sheet.general" resname="flexform.sheet.general">
+                <source>Settings</source>
+                <target>Parametres</target>
+            </trans-unit>
+            <trans-unit id="flexform.maxResults" resname="flexform.maxResults">
+                <source>Maximum number of suggestions</source>
+                <target>Nombre maximum de suggestions</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes" resname="flexform.allowedTypes">
+                <source>Allowed content types</source>
+                <target>Types de contenus autorises</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.description" resname="flexform.allowedTypes.description">
+                <source>If none selected, all indexed content types are shown.</source>
+                <target>Si aucun selectionne, tous les types indexes sont affiches.</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.pages" resname="flexform.allowedTypes.pages">
+                <source>Pages</source>
+                <target>Pages</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.news" resname="flexform.allowedTypes.news">
+                <source>News articles</source>
+                <target>Actualites</target>
+            </trans-unit>
+            <trans-unit id="flexform.showScore" resname="flexform.showScore">
+                <source>Show relevance score</source>
+                <target>Afficher le score de similarite</target>
+            </trans-unit>
+            <trans-unit id="flexform.showContentType" resname="flexform.showContentType">
+                <source>Show content type badge</source>
+                <target>Afficher le badge de type de contenu</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

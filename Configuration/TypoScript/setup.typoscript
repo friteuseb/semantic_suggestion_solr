@@ -20,6 +20,7 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         minDocFreq = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.minDocFreq}
         mltFields = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.mltFields}
         boostFields = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.boostFields}
+        allowedTypes = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.allowedTypes}
         excludeContentTypes = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.excludeContentTypes}
         showScore = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showScore}
         showContentType = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showContentType}

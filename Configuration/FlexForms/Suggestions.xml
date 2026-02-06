@@ -1,0 +1,55 @@
+<T3DataStructure>
+    <sheets>
+        <sDEF>
+            <ROOT>
+                <sheetTitle>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.sheet.general</sheetTitle>
+                <type>array</type>
+                <el>
+                    <settings.maxResults>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.maxResults</label>
+                        <config>
+                            <type>number</type>
+                            <default>6</default>
+                            <range>
+                                <lower>1</lower>
+                                <upper>30</upper>
+                            </range>
+                        </config>
+                    </settings.maxResults>
+                    <settings.allowedTypes>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes</label>
+                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.description</description>
+                        <config>
+                            <type>select</type>
+                            <renderType>selectCheckBox</renderType>
+                            <items>
+                                <numIndex index="0">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.pages</label>
+                                    <value>pages</value>
+                                </numIndex>
+                                <numIndex index="1">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.news</label>
+                                    <value>tx_news_domain_model_news</value>
+                                </numIndex>
+                            </items>
+                        </config>
+                    </settings.allowedTypes>
+                    <settings.showContentType>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showContentType</label>
+                        <config>
+                            <type>check</type>
+                            <default>1</default>
+                        </config>
+                    </settings.showContentType>
+                    <settings.showScore>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showScore</label>
+                        <config>
+                            <type>check</type>
+                            <default>0</default>
+                        </config>
+                    </settings.showScore>
+                </el>
+            </ROOT>
+        </sDEF>
+    </sheets>
+</T3DataStructure>

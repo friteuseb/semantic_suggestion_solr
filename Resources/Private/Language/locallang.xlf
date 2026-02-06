@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="messages" date="2025-01-01T00:00:00Z" product-name="semantic_suggestion_solr">
+        <header/>
+        <body>
+            <trans-unit id="plugin.title" resname="plugin.title">
+                <source>Similar content (Solr)</source>
+            </trans-unit>
+            <trans-unit id="heading" resname="heading">
+                <source>Related content</source>
+            </trans-unit>
+            <trans-unit id="button.view" resname="button.view">
+                <source>Read more</source>
+            </trans-unit>
+            <trans-unit id="score.label" resname="score.label">
+                <source>Relevance</source>
+            </trans-unit>
+            <trans-unit id="type.pages" resname="type.pages">
+                <source>Page</source>
+            </trans-unit>
+            <trans-unit id="type.tx_news_domain_model_news" resname="type.tx_news_domain_model_news">
+                <source>News</source>
+            </trans-unit>
+            <trans-unit id="flexform.sheet.general" resname="flexform.sheet.general">
+                <source>Settings</source>
+            </trans-unit>
+            <trans-unit id="flexform.maxResults" resname="flexform.maxResults">
+                <source>Maximum number of suggestions</source>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes" resname="flexform.allowedTypes">
+                <source>Allowed content types</source>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.description" resname="flexform.allowedTypes.description">
+                <source>If none selected, all indexed content types are shown.</source>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.pages" resname="flexform.allowedTypes.pages">
+                <source>Pages</source>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.news" resname="flexform.allowedTypes.news">
+                <source>News articles</source>
+            </trans-unit>
+            <trans-unit id="flexform.showScore" resname="flexform.showScore">
+                <source>Show relevance score</source>
+            </trans-unit>
+            <trans-unit id="flexform.showContentType" resname="flexform.showContentType">
+                <source>Show content type badge</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

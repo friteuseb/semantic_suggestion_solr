@@ -16,11 +16,6 @@ class SolrMltService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private const TYPE_LABELS = [
-        'pages' => 'Page',
-        'tx_news_domain_model_news' => 'Actualit\u00e9',
-    ];
-
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly SiteFinder $siteFinder,
@@ -30,12 +25,13 @@ class SolrMltService implements LoggerAwareInterface
      * Find similar documents for a page.
      *
      * @param int $pageUid The current page UID
-     * @param array $settings TypoScript settings
+     * @param array $settings TypoScript settings (merged with FlexForm)
+     * @param int $languageUid Current frontend language UID
      * @return array Normalized suggestion array
      */
-    public function findSimilar(int $pageUid, array $settings): array
+    public function findSimilar(int $pageUid, array $settings, int $languageUid = 0): array
     {
-        return $this->findSimilarByType('pages', $pageUid, $settings);
+        return $this->findSimilarByType('pages', $pageUid, $settings, $languageUid);
     }
 
     /**
@@ -43,14 +39,15 @@ class SolrMltService implements LoggerAwareInterface
      *
      * @param string $type Solr document type (e.g. 'pages', 'tx_news_domain_model_news')
      * @param int $uid UID of the record
-     * @param array $settings TypoScript settings
+     * @param array $settings TypoScript settings (merged with FlexForm)
+     * @param int $languageUid Current frontend language UID
      * @return array Normalized suggestion array
      */
-    public function findSimilarByType(string $type, int $uid, array $settings): array
+    public function findSimilarByType(string $type, int $uid, array $settings, int $languageUid = 0): array
     {
         try {
-            $rootPageId = $this->resolveRootPageId($uid, $type);
-            $connection = $this->connectionManager->getConnectionByRootPageId($rootPageId);
+            $rootPageId = $this->resolveRootPageId($uid);
+            $connection = $this->connectionManager->getConnectionByRootPageId($rootPageId, $languageUid);
             $client = $connection->getReadService()->getClient();
 
             // Step 1: Find the Solr document ID for this record
@@ -77,20 +74,11 @@ class SolrMltService implements LoggerAwareInterface
             $mltQuery->setFields('*, score');
             $mltQuery->setMatchInclude(false);
 
-            // Step 3: Add filter for excluded content types
-            $excludeTypes = $this->parseExcludeTypes($settings['excludeContentTypes'] ?? '');
-            if ($excludeTypes !== []) {
-                $filterParts = array_map(
-                    fn(string $t) => '-type:' . $this->escapeQueryValue($t),
-                    $excludeTypes
-                );
-                $mltQuery->createFilterQuery('excludeTypes')
-                    ->setQuery(implode(' AND ', $filterParts));
-            }
+            // Step 3: Apply type filters (allowedTypes whitelist or excludeContentTypes blacklist)
+            $this->applyTypeFilters($mltQuery, $settings);
 
             $result = $client->moreLikeThis($mltQuery);
 
-            // Step 4: Parse results into normalized suggestions
             return $this->parseResults($result);
         } catch (\Throwable $e) {
             $this->logger?->error('Solr MLT query failed: {message}', [
@@ -103,8 +91,33 @@ class SolrMltService implements LoggerAwareInterface
     }
 
     /**
-     * Resolve the Solr document ID for a given record.
+     * Apply content type filter queries based on settings.
+     * allowedTypes (whitelist from FlexForm) takes precedence over excludeContentTypes (TypoScript blacklist).
      */
+    private function applyTypeFilters(object $mltQuery, array $settings): void
+    {
+        $allowedTypes = $this->parseTypeList($settings['allowedTypes'] ?? '');
+        if ($allowedTypes !== []) {
+            $parts = array_map(
+                fn(string $t) => 'type:' . $this->escapeQueryValue($t),
+                $allowedTypes
+            );
+            $mltQuery->createFilterQuery('allowedTypes')
+                ->setQuery(implode(' OR ', $parts));
+            return;
+        }
+
+        $excludeTypes = $this->parseTypeList($settings['excludeContentTypes'] ?? '');
+        if ($excludeTypes !== []) {
+            $parts = array_map(
+                fn(string $t) => '-type:' . $this->escapeQueryValue($t),
+                $excludeTypes
+            );
+            $mltQuery->createFilterQuery('excludeTypes')
+                ->setQuery(implode(' AND ', $parts));
+        }
+    }
+
     private function resolveDocumentId(object $client, string $type, int $uid): ?string
     {
         $select = $client->createSelect();
@@ -125,9 +138,6 @@ class SolrMltService implements LoggerAwareInterface
         return null;
     }
 
-    /**
-     * Parse MLT result into normalized suggestion array.
-     */
     private function parseResults(object $result): array
     {
         $suggestions = [];
@@ -140,9 +150,7 @@ class SolrMltService implements LoggerAwareInterface
                 'title' => $doc->title ?? '',
                 'url' => $url,
                 'type' => $type,
-                'typeLabel' => self::TYPE_LABELS[$type] ?? ucfirst(
-                    str_replace(['tx_', '_domain_model_'], ['', ' '], $type)
-                ),
+                'typeLabel' => $this->buildTypeLabel($type),
                 'score' => $doc->score ?? 0.0,
                 'snippet' => $this->buildSnippet($doc),
                 'uid' => (int)($doc->uid ?? 0),
@@ -153,8 +161,16 @@ class SolrMltService implements LoggerAwareInterface
     }
 
     /**
-     * Build a text snippet from the document content.
+     * Build a fallback type label from the Solr type field.
+     * The template should prefer f:translate with key "type.{type}" over this value.
      */
+    private function buildTypeLabel(string $type): string
+    {
+        // Strip common TYPO3 prefixes to produce a readable fallback
+        $label = str_replace(['tx_', '_domain_model_'], ['', ' '], $type);
+        return ucfirst(trim($label));
+    }
+
     private function buildSnippet(object $doc): string
     {
         $content = $doc->content ?? '';
@@ -178,16 +194,12 @@ class SolrMltService implements LoggerAwareInterface
         return $content;
     }
 
-    /**
-     * Resolve the root page ID for a given page UID.
-     */
-    private function resolveRootPageId(int $pageUid, string $type): int
+    private function resolveRootPageId(int $pageUid): int
     {
         try {
             $site = $this->siteFinder->getSiteByPageId($pageUid);
             return $site->getRootPageId();
         } catch (\Throwable) {
-            // Fallback: use the first available site
             $sites = $this->siteFinder->getAllSites();
             foreach ($sites as $site) {
                 return $site->getRootPageId();
@@ -197,7 +209,7 @@ class SolrMltService implements LoggerAwareInterface
     }
 
     /**
-     * Normalize boost fields from comma-separated to space-separated format.
+     * Normalize boost fields from comma-separated to space-separated.
      * Solarium expects: "content^0.5 title^1.2 keywords^2.0"
      */
     private function normalizeBoostFields(string $boostFields): string
@@ -205,24 +217,18 @@ class SolrMltService implements LoggerAwareInterface
         return str_replace(',', ' ', $boostFields);
     }
 
-    /**
-     * Parse comma-separated exclude types into array, filtering empty values.
-     */
-    private function parseExcludeTypes(string $excludeTypes): array
+    private function parseTypeList(string $types): array
     {
-        if (trim($excludeTypes) === '') {
+        if (trim($types) === '') {
             return [];
         }
 
         return array_filter(
-            array_map('trim', explode(',', $excludeTypes)),
+            array_map('trim', explode(',', $types)),
             fn(string $v) => $v !== ''
         );
     }
 
-    /**
-     * Escape special Solr query characters in a value.
-     */
     private function escapeQueryValue(string $value): string
     {
         $specialChars = ['+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\', '/'];

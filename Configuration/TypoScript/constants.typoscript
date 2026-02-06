@@ -24,15 +24,20 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         # Field boost weights for MLT query (mlt.qf). Format: field^weight,field^weight
         boostFields = content^0.5,title^1.2,keywords^2.0
 
-        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Exclude Content Types
-        # Comma-separated list of Solr document types to exclude from results (e.g. tx_news_domain_model_news).
+        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Allowed Content Types
+        # Comma-separated whitelist of Solr document types. If empty, all types are shown.
+        # Overridden per plugin instance via FlexForm checkboxes.
+        allowedTypes =
+
+        # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Exclude Content Types
+        # Comma-separated blacklist of Solr document types. Only used if allowedTypes is empty.
         excludeContentTypes =
 
-        # cat=semantic_suggestion_solr:Display/110/002; type=boolean; label=Show Similarity Score
+        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Show Similarity Score
         # Display the MLT similarity score on each suggestion card.
         showScore = 0
 
-        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Show Content Type Badge
+        # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Show Content Type Badge
         # Display a badge indicating the content type (Page, News, etc.).
         showContentType = 1
     }

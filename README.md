@@ -1,18 +1,27 @@
 # Semantic Suggestion Solr
 
-Extension TYPO3 qui affiche des suggestions de contenus similaires via Solr More Like This (MLT).
+TYPO3 extension that displays related content suggestions using Solr More Like This (MLT). Multi-content: pages, news (EXT:news), and any other indexed record type.
 
-## Principe
+## How it works
 
-L'extension interroge le handler MLT de Solr avec l'identifiant du document courant. Solr calcule la similarite par TF-IDF sur les term vectors et retourne les documents les plus proches. Aucun calcul cote PHP, pas de base de donnees propre, pas de scheduler.
+The plugin sends the current document's Solr ID to the MLT request handler. Solr computes similarity via TF-IDF on stored term vectors and returns the closest documents. No PHP-side computation, no database, no scheduler.
 
-Les contenus multi-types sont pris en charge : pages, actualites (EXT:news), et tout autre contenu indexe dans Solr.
+### Language handling
 
-## Prerequis
+EXT:solr maintains one core per site language. The plugin reads the current frontend language from the request and connects to the matching Solr core via `ConnectionManager->getConnectionByRootPageId($rootPageId, $languageUid)`. MLT results are therefore always in the same language as the current page.
+
+### Context detection
+
+The plugin detects the current content type automatically:
+
+- Standard page: MLT lookup by `type:pages AND uid:{pageUid}`
+- News detail (EXT:news): if `tx_news_pi1[news]` is present in the request, MLT lookup by `type:tx_news_domain_model_news AND uid:{newsUid}`
+
+## Requirements
 
 - TYPO3 13.4+
-- EXT:solr 13.0+ (`apache-solr-for-typo3/solr`) avec un index fonctionnel
-- Handler `/mlt` actif sur le core Solr (present par defaut dans la configuration EXT:solr)
+- EXT:solr 13.0+ with a working index
+- The `/mlt` request handler enabled on the Solr core (default in EXT:solr configurations)
 
 ## Installation
 
@@ -20,117 +29,126 @@ Les contenus multi-types sont pris en charge : pages, actualites (EXT:news), et 
 composer require cyrilmarchand/semantic-suggestion-solr:@dev
 ```
 
-Vider les caches TYPO3, puis inclure le TypoScript statique de l'extension dans le template du site.
+Flush TYPO3 caches, then include the extension's static TypoScript in the site template.
 
-## Utilisation
+## Usage
 
-### En tant qu'element de contenu
+### As a content element
 
-Inserer l'element "Suggestions similaires (Solr)" via le backend, dans n'importe quelle page.
+Insert the plugin "Similar content (Solr)" via the backend. The FlexForm provides per-instance settings:
 
-### En tant qu'objet TypoScript
+- Maximum number of suggestions
+- Allowed content types (checkboxes: Pages, News -- if none checked, all types are shown)
+- Show/hide content type badge
+- Show/hide relevance score
 
-Pour integrer directement dans un template Fluid :
+### In a Fluid template
 
 ```html
 <f:cObject typoscriptObjectPath="lib.semantic_suggestion_solr" />
 ```
 
-### Detection automatique du contexte
+## Configuration
 
-Le plugin detecte automatiquement le type de contenu courant :
+### TypoScript constants
 
-- **Page standard** : recherche MLT basee sur le `pageUid`
-- **Detail actualite** (EXT:news) : recherche MLT basee sur le type `tx_news_domain_model_news` et l'UID de l'actualite (parametre `tx_news_pi1[news]`)
+All settings live under `plugin.tx_semanticsuggestionsolr_suggestions.settings`.
 
-## Configuration TypoScript
+#### MLT query parameters
 
-Tous les parametres sont modifiables via les constantes TypoScript.
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `maxResults` | `6` | Max suggestions returned |
+| `minTermFreq` | `1` | Minimum term frequency (mlt.mintf) |
+| `minDocFreq` | `1` | Minimum document frequency (mlt.mindf) |
+| `mltFields` | `content,title,keywords` | Fields used for similarity |
+| `boostFields` | `content^0.5,title^1.2,keywords^2.0` | Field weights (mlt.qf) |
 
-### Parametres MLT
+#### Display
 
-| Constante | Defaut | Description |
-|-----------|--------|-------------|
-| `maxResults` | `6` | Nombre max de suggestions retournees |
-| `minTermFreq` | `1` | Frequence minimale d'un terme pour etre considere (mlt.mintf) |
-| `minDocFreq` | `1` | Nombre minimal de documents contenant le terme (mlt.mindf) |
-| `mltFields` | `content,title,keywords` | Champs Solr utilises pour le calcul de similarite |
-| `boostFields` | `content^0.5,title^1.2,keywords^2.0` | Poids des champs (mlt.qf) |
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `allowedTypes` | *(empty)* | Whitelist of Solr types (comma-separated). Empty = all types. Overridden by FlexForm. |
+| `excludeContentTypes` | *(empty)* | Blacklist of Solr types. Only used when `allowedTypes` is empty. |
+| `showScore` | `0` | Display the MLT relevance score |
+| `showContentType` | `1` | Display a type badge (Page, News, etc.) |
 
-### Parametres d'affichage
+### FlexForm vs TypoScript
 
-| Constante | Defaut | Description |
-|-----------|--------|-------------|
-| `excludeContentTypes` | *(vide)* | Types de documents Solr a exclure (separes par virgule) |
-| `showScore` | `0` | Afficher le score de similarite MLT |
-| `showContentType` | `1` | Afficher le badge de type (Page, Actualite, etc.) |
+FlexForm settings (set per content element instance) override TypoScript settings for the same keys. The `allowedTypes` whitelist from FlexForm checkboxes takes precedence over the `excludeContentTypes` blacklist from TypoScript.
 
-Chemin des constantes : `plugin.tx_semanticsuggestionsolr_suggestions.settings.*`
-
-### Exemple de surcharge
+### Example override
 
 ```typoscript
 plugin.tx_semanticsuggestionsolr_suggestions.settings {
     maxResults = 4
     boostFields = title^2.0,keywords^3.0,content^0.3
     showScore = 1
-    excludeContentTypes = tx_news_domain_model_news
 }
 ```
 
-## Fonctionnement technique
+## Localization
 
-1. Resolution du document Solr courant via une requete `type:{type} AND uid:{uid}` pour obtenir l'identifiant Solr (format `{siteHash}/{type}/{uid}`)
-2. Execution de la requete MLT Solarium (`createMoreLikeThis`) sur cet identifiant
-3. Normalisation des resultats : titre, URL, type, label, score, snippet
+All frontend labels (heading, button, type badges, score label) are defined in XLIFF files and resolved via `f:translate`. Shipped translations:
 
-### Chaine d'acces Solr
+- English (default)
+- French
+
+Type badges use the key pattern `type.{solr_type}` (e.g. `type.pages`, `type.tx_news_domain_model_news`). To add labels for custom indexed types, override the XLIFF or add keys in your site package.
+
+## Architecture
+
+```
+Classes/
+    Controller/SuggestionsController.php    Frontend plugin (listAction)
+    Service/SolrMltService.php              MLT query via Solarium client
+Configuration/
+    FlexForms/Suggestions.xml               Per-instance backend settings
+    Services.php                            Dependency injection
+    TCA/Overrides/tt_content.php            Plugin + FlexForm registration
+    TypoScript/
+        constants.typoscript                Configurable defaults
+        setup.typoscript                    Plugin setup + rendering definition
+Resources/Private/
+    Language/
+        locallang.xlf                       English labels
+        fr.locallang.xlf                    French labels
+    Templates/Suggestions/
+        List.html                           Fluid template (Bootstrap cards)
+```
+
+### Solr access chain
 
 ```
 ConnectionManager -> SolrConnection -> SolrReadService -> Solarium Client
 ```
 
-### Structure d'une suggestion
+### Suggestion data structure
+
+Each suggestion returned by the service:
 
 ```php
 [
-    'title'     => string,  // Titre du document
-    'url'       => string,  // URL absolue (champ Solr)
-    'type'      => string,  // Type Solr (pages, tx_news_domain_model_news, ...)
-    'typeLabel'  => string,  // Label affiche (Page, Actualite, ...)
-    'score'     => float,   // Score de similarite MLT
-    'snippet'   => string,  // Extrait du contenu (200 car. max)
-    'uid'       => int,     // UID de l'enregistrement
+    'title'     => string,  // Document title
+    'url'       => string,  // Absolute URL from Solr
+    'type'      => string,  // Solr type (pages, tx_news_domain_model_news, ...)
+    'typeLabel'  => string,  // Fallback display label
+    'score'     => float,   // MLT relevance score
+    'snippet'   => string,  // Content excerpt (200 chars max)
+    'uid'       => int,     // Record UID
 ]
 ```
 
-## Structure de l'extension
+## Template customization
 
-```
-Classes/
-    Controller/SuggestionsController.php    Plugin frontend (listAction)
-    Service/SolrMltService.php              Requete MLT via Solarium
-Configuration/
-    Services.php                            Injection de dependances
-    TCA/Overrides/tt_content.php            Enregistrement du plugin
-    TypoScript/
-        constants.typoscript                Constantes configurables
-        setup.typoscript                    Configuration du plugin
-Resources/
-    Private/Templates/Suggestions/
-        List.html                           Template Fluid (cartes Bootstrap)
-```
-
-## Personnalisation du template
-
-Surcharger le template via TypoScript :
+Override the template path via TypoScript:
 
 ```typoscript
-plugin.tx_semanticsuggestionsolr_suggestions.view.templateRootPaths.10 = EXT:mon_extension/Resources/Private/Templates/SemanticSuggestionSolr/
+plugin.tx_semanticsuggestionsolr_suggestions.view.templateRootPaths.10 = EXT:my_sitepackage/Resources/Private/Templates/SemanticSuggestionSolr/
 ```
 
-Puis creer `Suggestions/List.html` dans ce repertoire. Les variables disponibles dans le template sont `{suggestions}` (tableau) et `{settings}` (configuration TypoScript).
+Then create `Suggestions/List.html` in that directory. Available template variables: `{suggestions}` (array) and `{settings}` (merged TypoScript + FlexForm).
 
-## Licence
+## License
 
 GPL-2.0-or-later

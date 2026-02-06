@@ -5,7 +5,7 @@
             <div class="frame-container">
                 <div class="frame-inner">
                     <div class="frame-header">
-                        <h2 class="element-header">Contenus similaires</h2>
+                        <h2 class="element-header"><f:translate key="heading" extensionName="SemanticSuggestionSolr" /></h2>
                     </div>
                     <div class="card-menu card-menu-align-left card-menu-columns-3">
                         <f:for each="{suggestions}" as="suggestion">
@@ -13,7 +13,9 @@
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <f:if condition="{settings.showContentType} == 1">
-                                            <span class="badge bg-secondary mb-2">{suggestion.typeLabel}</span>
+                                            <span class="badge bg-secondary mb-2">
+                                                <f:translate key="type.{suggestion.type}" extensionName="SemanticSuggestionSolr" default="{suggestion.typeLabel}" />
+                                            </span>
                                         </f:if>
                                         <h5 class="card-title">
                                             <a href="{suggestion.url}">{suggestion.title}</a>
@@ -24,13 +26,13 @@
                                         <f:if condition="{settings.showScore} == 1">
                                             <p class="card-text">
                                                 <small class="text-muted">
-                                                    Score : <f:format.number decimals="4">{suggestion.score}</f:format.number>
+                                                    <f:translate key="score.label" extensionName="SemanticSuggestionSolr" /> : <f:format.number decimals="4">{suggestion.score}</f:format.number>
                                                 </small>
                                             </p>
                                         </f:if>
                                     </div>
                                     <div class="card-footer">
-                                        <a href="{suggestion.url}" class="btn btn-primary btn-sm">Voir</a>
+                                        <a href="{suggestion.url}" class="btn btn-primary btn-sm"><f:translate key="button.view" extensionName="SemanticSuggestionSolr" /></a>
                                     </div>
                                 </div>
                             </div>

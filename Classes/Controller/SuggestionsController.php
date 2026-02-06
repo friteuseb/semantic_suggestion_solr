@@ -23,18 +23,22 @@ class SuggestionsController extends ActionController
     public function listAction(): ResponseInterface
     {
         $pageId = $this->resolveCurrentPageId();
-
-        // Detect if we are on a news detail page
+        $languageUid = $this->resolveLanguageUid();
         $newsUid = $this->resolveNewsUid();
 
         if ($newsUid > 0) {
             $suggestions = $this->solrMltService->findSimilarByType(
                 'tx_news_domain_model_news',
                 $newsUid,
-                $this->settings
+                $this->settings,
+                $languageUid
             );
         } else {
-            $suggestions = $this->solrMltService->findSimilar($pageId, $this->settings);
+            $suggestions = $this->solrMltService->findSimilar(
+                $pageId,
+                $this->settings,
+                $languageUid
+            );
         }
 
         $this->view->assignMultiple([
@@ -45,9 +49,6 @@ class SuggestionsController extends ActionController
         return $this->htmlResponse();
     }
 
-    /**
-     * Get the current page ID from the request routing.
-     */
     private function resolveCurrentPageId(): int
     {
         $routing = $this->request->getAttribute('routing');
@@ -58,14 +59,20 @@ class SuggestionsController extends ActionController
         return 0;
     }
 
-    /**
-     * Check if we are on a news detail page and return the news UID.
-     */
+    private function resolveLanguageUid(): int
+    {
+        $siteLanguage = $this->request->getAttribute('language');
+        if ($siteLanguage !== null && method_exists($siteLanguage, 'getLanguageId')) {
+            return $siteLanguage->getLanguageId();
+        }
+
+        return 0;
+    }
+
     private function resolveNewsUid(): int
     {
         $queryParams = $this->request->getQueryParams();
 
-        // EXT:news uses tx_news_pi1[news] as the detail parameter
         if (isset($queryParams['tx_news_pi1']['news'])) {
             return (int)$queryParams['tx_news_pi1']['news'];
         }
