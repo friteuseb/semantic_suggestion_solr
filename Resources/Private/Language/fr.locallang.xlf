@@ -51,6 +51,14 @@
                 <source>News articles</source>
                 <target>Actualites</target>
             </trans-unit>
+            <trans-unit id="flexform.filterByPids" resname="flexform.filterByPids">
+                <source>Restrict to pages / storage folders</source>
+                <target>Restreindre aux pages / dossiers de stockage</target>
+            </trans-unit>
+            <trans-unit id="flexform.filterByPids.description" resname="flexform.filterByPids.description">
+                <source>Only show suggestions from these locations. For pages: select the parent page. For news/records: select the storage folder. Leave empty for no restriction.</source>
+                <target>N'afficher que les suggestions de ces emplacements. Pour les pages : selectionner la page parente. Pour les news/enregistrements : selectionner le dossier de stockage. Vide = aucune restriction.</target>
+            </trans-unit>
             <trans-unit id="flexform.showScore" resname="flexform.showScore">
                 <source>Show relevance score</source>
                 <target>Afficher le score de similarite</target>
@@ -58,6 +66,42 @@
             <trans-unit id="flexform.showContentType" resname="flexform.showContentType">
                 <source>Show content type badge</source>
                 <target>Afficher le badge de type de contenu</target>
+            </trans-unit>
+            <trans-unit id="flexform.showImage" resname="flexform.showImage">
+                <source>Show image</source>
+                <target>Afficher l'image</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode" resname="flexform.similarityMode">
+                <source>Similarity algorithm</source>
+                <target>Algorithme de similarite</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.description" resname="flexform.similarityMode.description">
+                <source>MLT = lexical (TF-IDF, no model needed). KNN = semantic (requires LLM model in Solr). Hybrid = both combined.</source>
+                <target>MLT = lexical (TF-IDF, pas de modele). KNN = semantique (modele LLM requis dans Solr). Hybride = les deux combines.</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.mlt" resname="flexform.similarityMode.mlt">
+                <source>MLT – More Like This (lexical)</source>
+                <target>MLT – More Like This (lexical)</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.knn" resname="flexform.similarityMode.knn">
+                <source>KNN – Vector search (semantic)</source>
+                <target>KNN – Recherche vectorielle (semantique)</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.hybrid" resname="flexform.similarityMode.hybrid">
+                <source>Hybrid – MLT + KNN combined</source>
+                <target>Hybride – MLT + KNN combines</target>
+            </trans-unit>
+            <trans-unit id="mode.mlt" resname="mode.mlt">
+                <source>MLT</source>
+                <target>MLT</target>
+            </trans-unit>
+            <trans-unit id="mode.knn" resname="mode.knn">
+                <source>KNN</source>
+                <target>KNN</target>
+            </trans-unit>
+            <trans-unit id="mode.hybrid" resname="mode.hybrid">
+                <source>Hybrid</source>
+                <target>Hybride</target>
             </trans-unit>
         </body>
     </file>

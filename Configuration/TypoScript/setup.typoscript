@@ -22,8 +22,14 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         boostFields = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.boostFields}
         allowedTypes = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.allowedTypes}
         excludeContentTypes = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.excludeContentTypes}
+        filterByPids = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.filterByPids}
         showScore = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showScore}
         showContentType = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showContentType}
+        showImage = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showImage}
+        similarityMode = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.similarityMode}
+        vectorTopK = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorTopK}
+        vectorMinSimilarity = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorMinSimilarity}
+        vectorModelName = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorModelName}
     }
 }
 

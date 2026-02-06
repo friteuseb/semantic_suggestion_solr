@@ -1,45 +1,85 @@
-# customsubcategory=100=MLT Query Settings
+# customsubcategory=100=Similarity Algorithm
 # customsubcategory=110=Display Settings
 # customsubcategory=120=View Configuration
 
 plugin.tx_semanticsuggestionsolr_suggestions {
     settings {
-        # cat=semantic_suggestion_solr:MLT Query/100/001; type=int+; label=Max Results
-        # Maximum number of similar documents returned by MLT.
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/001; type=options[mlt,knn,hybrid]; label=Mode de similarite
+        # Algorithme utilise pour trouver les contenus similaires :
+        # - mlt : MLT = More Like This. Compare les mots-cles (TF-IDF). Rapide, pas besoin de modele IA.
+        # - knn : KNN = K-Nearest Neighbors (K plus proches voisins). Compare le SENS du texte
+        #         grace a des vecteurs generes par un modele IA (ex: OpenAI). Plus pertinent semantiquement
+        #         mais necessite un modele configure dans Solr (voir vectorModelName).
+        # - hybrid : Combine les deux approches (40% MLT + 60% KNN) pour le meilleur des deux mondes.
+        similarityMode = mlt
+
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/002; type=int+; label=Nombre max de suggestions
+        # Nombre maximum de contenus similaires affiches.
         maxResults = 6
 
-        # cat=semantic_suggestion_solr:MLT Query/100/002; type=int+; label=Min Term Frequency
-        # Minimum term frequency for MLT (mlt.mintf). Terms with lower frequency are ignored.
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/010; type=int+; label=MLT : Frequence minimum du terme
+        # Uniquement pour le mode MLT. Les mots apparaissant moins de X fois dans le document source sont ignores.
         minTermFreq = 1
 
-        # cat=semantic_suggestion_solr:MLT Query/100/003; type=int+; label=Min Document Frequency
-        # Minimum document frequency for MLT (mlt.mindf). Terms appearing in fewer documents are ignored.
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/011; type=int+; label=MLT : Frequence minimum dans le corpus
+        # Uniquement pour le mode MLT. Les mots apparaissant dans moins de X documents de l'index sont ignores.
         minDocFreq = 1
 
-        # cat=semantic_suggestion_solr:MLT Query/100/004; type=string; label=MLT Fields
-        # Comma-separated list of Solr fields used for similarity comparison.
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/012; type=string; label=MLT : Champs compares
+        # Uniquement pour le mode MLT. Champs Solr utilises pour la comparaison (separes par des virgules).
         mltFields = content,title,keywords
 
-        # cat=semantic_suggestion_solr:MLT Query/100/005; type=string; label=Boost Fields
-        # Field boost weights for MLT query (mlt.qf). Format: field^weight,field^weight
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/013; type=string; label=MLT : Poids des champs
+        # Uniquement pour le mode MLT. Poids de chaque champ (format: champ^poids). Plus le poids est eleve,
+        # plus ce champ influence le calcul de similarite. Ex: keywords^2.0 = les mots-cles comptent 2x plus.
         boostFields = content^0.5,title^1.2,keywords^2.0
 
-        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Allowed Content Types
-        # Comma-separated whitelist of Solr document types. If empty, all types are shown.
-        # Overridden per plugin instance via FlexForm checkboxes.
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/020; type=int+; label=KNN : Nombre de voisins (topK)
+        # Uniquement pour les modes KNN et hybrid. Nombre de voisins vectoriels recuperes AVANT
+        # l'application des filtres (type de contenu, PIDs). Doit etre superieur a "Nombre max de suggestions"
+        # pour laisser de la marge au filtrage. Valeur recommandee : 50.
+        vectorTopK = 50
+
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/021; type=string; label=KNN : Similarite minimum
+        # Uniquement pour les modes KNN et hybrid. Seuil minimum de similarite cosinus (entre 0.0 et 1.0).
+        # Les documents en dessous de ce seuil sont exclus. 0.5 = seuil modere, 0.75 = strict.
+        vectorMinSimilarity = 0.5
+
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/022; type=string; label=KNN : Nom du modele IA
+        # Nom du modele enregistre dans le "model store" de Solr. Ce modele transforme le texte en vecteur.
+        # La valeur par defaut "llm" correspond au nom utilise dans la configuration standard d'EXT:solr.
+        # Pour configurer ce modele : voir la documentation EXT:solr > Vector Search.
+        vectorModelName = llm
+
+        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Types de contenus autorises
+        # Liste de types Solr autorises (separes par des virgules). Si vide, tous les types sont affiches.
+        # Peut etre surcharge par instance de plugin via le FlexForm.
         allowedTypes =
 
-        # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Exclude Content Types
-        # Comma-separated blacklist of Solr document types. Only used if allowedTypes is empty.
+        # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Types de contenus exclus
+        # Liste de types Solr a exclure (separes par des virgules). Utilise seulement si "Types autorises" est vide.
         excludeContentTypes =
 
-        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Show Similarity Score
-        # Display the MLT similarity score on each suggestion card.
+        # cat=semantic_suggestion_solr:Display/110/006; type=string; label=Filtrer par pages/dossiers (PIDs)
+        # UIDs de pages parentes ou dossiers de stockage (separes par des virgules).
+        # Seules les suggestions dont le PID correspond seront affichees.
+        # - Pour les pages : pid = UID de la page parente dans l'arborescence (ex: 86)
+        # - Pour les news : pid = UID du dossier de stockage (ex: 42)
+        # Combinable : filterByPids = 86,42 renvoie les pages sous 86 ET les news du dossier 42.
+        # Vide = aucune restriction.
+        filterByPids =
+
+        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Afficher le score de similarite
+        # Affiche le score de similarite sur chaque carte de suggestion (utile pour le debug/comparaison).
         showScore = 0
 
-        # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Show Content Type Badge
-        # Display a badge indicating the content type (Page, News, etc.).
+        # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Afficher le badge de type
+        # Affiche un badge indiquant le type de contenu (Page, News, etc.).
         showContentType = 1
+
+        # cat=semantic_suggestion_solr:Display/110/005; type=boolean; label=Afficher l'image
+        # Affiche la premiere image media de chaque suggestion.
+        showImage = 1
     }
 
     view {

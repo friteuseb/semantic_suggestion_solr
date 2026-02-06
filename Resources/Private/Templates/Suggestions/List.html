@@ -7,10 +7,30 @@
                     <div class="frame-header">
                         <h2 class="element-header"><f:translate key="heading" extensionName="SemanticSuggestionSolr" /></h2>
                     </div>
+                    <f:if condition="{settings.showScore} == 1">
+                        <p class="text-muted mb-2">
+                            <small>
+                                Mode :
+                                <f:if condition="{settings.similarityMode}">
+                                    <f:then>
+                                        <span class="badge bg-info"><f:translate key="mode.{settings.similarityMode}" extensionName="SemanticSuggestionSolr" default="{settings.similarityMode}" /></span>
+                                    </f:then>
+                                    <f:else>
+                                        <span class="badge bg-info">MLT</span>
+                                    </f:else>
+                                </f:if>
+                            </small>
+                        </p>
+                    </f:if>
                     <div class="card-menu card-menu-align-left card-menu-columns-3">
                         <f:for each="{suggestions}" as="suggestion">
                             <div class="card-menu-item">
                                 <div class="card h-100">
+                                    <f:if condition="{suggestion.image}">
+                                        <div class="card-img-top">
+                                            <f:image image="{suggestion.image}" width="410c" height="280c" class="img-fluid" loading="lazy" alt="" />
+                                        </div>
+                                    </f:if>
                                     <div class="card-body">
                                         <f:if condition="{settings.showContentType} == 1">
                                             <span class="badge bg-secondary mb-2">

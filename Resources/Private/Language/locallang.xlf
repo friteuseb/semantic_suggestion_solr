@@ -39,11 +39,44 @@
             <trans-unit id="flexform.allowedTypes.news" resname="flexform.allowedTypes.news">
                 <source>News articles</source>
             </trans-unit>
+            <trans-unit id="flexform.filterByPids" resname="flexform.filterByPids">
+                <source>Restrict to pages / storage folders</source>
+            </trans-unit>
+            <trans-unit id="flexform.filterByPids.description" resname="flexform.filterByPids.description">
+                <source>Only show suggestions from these locations. For pages: select the parent page. For news/records: select the storage folder. Leave empty for no restriction.</source>
+            </trans-unit>
             <trans-unit id="flexform.showScore" resname="flexform.showScore">
                 <source>Show relevance score</source>
             </trans-unit>
             <trans-unit id="flexform.showContentType" resname="flexform.showContentType">
                 <source>Show content type badge</source>
+            </trans-unit>
+            <trans-unit id="flexform.showImage" resname="flexform.showImage">
+                <source>Show image</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode" resname="flexform.similarityMode">
+                <source>Similarity algorithm</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.description" resname="flexform.similarityMode.description">
+                <source>MLT = lexical (TF-IDF, no model needed). KNN = semantic (requires LLM model in Solr). Hybrid = both combined.</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.mlt" resname="flexform.similarityMode.mlt">
+                <source>MLT – More Like This (lexical)</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.knn" resname="flexform.similarityMode.knn">
+                <source>KNN – Vector search (semantic)</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.hybrid" resname="flexform.similarityMode.hybrid">
+                <source>Hybrid – MLT + KNN combined</source>
+            </trans-unit>
+            <trans-unit id="mode.mlt" resname="mode.mlt">
+                <source>MLT</source>
+            </trans-unit>
+            <trans-unit id="mode.knn" resname="mode.knn">
+                <source>KNN</source>
+            </trans-unit>
+            <trans-unit id="mode.hybrid" resname="mode.hybrid">
+                <source>Hybrid</source>
             </trans-unit>
         </body>
     </file>
