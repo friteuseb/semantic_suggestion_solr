@@ -1,0 +1,42 @@
+plugin.tx_semanticsuggestionsolr_suggestions {
+    view {
+        templateRootPaths {
+            0 = EXT:semantic_suggestion_solr/Resources/Private/Templates/
+            1 = {$plugin.tx_semanticsuggestionsolr_suggestions.view.templateRootPath}
+        }
+        partialRootPaths {
+            0 = EXT:semantic_suggestion_solr/Resources/Private/Partials/
+            1 = {$plugin.tx_semanticsuggestionsolr_suggestions.view.partialRootPath}
+        }
+        layoutRootPaths {
+            0 = EXT:semantic_suggestion_solr/Resources/Private/Layouts/
+            1 = {$plugin.tx_semanticsuggestionsolr_suggestions.view.layoutRootPath}
+        }
+    }
+
+    settings {
+        maxResults = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.maxResults}
+        minTermFreq = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.minTermFreq}
+        minDocFreq = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.minDocFreq}
+        mltFields = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.mltFields}
+        boostFields = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.boostFields}
+        excludeContentTypes = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.excludeContentTypes}
+        showScore = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showScore}
+        showContentType = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showContentType}
+    }
+}
+
+# Rendering definition for content element
+tt_content.semanticsuggestionsolr_suggestions =< plugin.tx_semanticsuggestionsolr_suggestions
+
+# Reusable USER object for direct template integration
+lib.semantic_suggestion_solr = USER
+lib.semantic_suggestion_solr {
+    userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+    extensionName = SemanticSuggestionSolr
+    pluginName = Suggestions
+    vendorName = CyrilMarchand
+
+    view =< plugin.tx_semanticsuggestionsolr_suggestions.view
+    settings =< plugin.tx_semanticsuggestionsolr_suggestions.settings
+}

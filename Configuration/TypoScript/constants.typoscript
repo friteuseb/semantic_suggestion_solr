@@ -1,0 +1,50 @@
+# customsubcategory=100=MLT Query Settings
+# customsubcategory=110=Display Settings
+# customsubcategory=120=View Configuration
+
+plugin.tx_semanticsuggestionsolr_suggestions {
+    settings {
+        # cat=semantic_suggestion_solr:MLT Query/100/001; type=int+; label=Max Results
+        # Maximum number of similar documents returned by MLT.
+        maxResults = 6
+
+        # cat=semantic_suggestion_solr:MLT Query/100/002; type=int+; label=Min Term Frequency
+        # Minimum term frequency for MLT (mlt.mintf). Terms with lower frequency are ignored.
+        minTermFreq = 1
+
+        # cat=semantic_suggestion_solr:MLT Query/100/003; type=int+; label=Min Document Frequency
+        # Minimum document frequency for MLT (mlt.mindf). Terms appearing in fewer documents are ignored.
+        minDocFreq = 1
+
+        # cat=semantic_suggestion_solr:MLT Query/100/004; type=string; label=MLT Fields
+        # Comma-separated list of Solr fields used for similarity comparison.
+        mltFields = content,title,keywords
+
+        # cat=semantic_suggestion_solr:MLT Query/100/005; type=string; label=Boost Fields
+        # Field boost weights for MLT query (mlt.qf). Format: field^weight,field^weight
+        boostFields = content^0.5,title^1.2,keywords^2.0
+
+        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Exclude Content Types
+        # Comma-separated list of Solr document types to exclude from results (e.g. tx_news_domain_model_news).
+        excludeContentTypes =
+
+        # cat=semantic_suggestion_solr:Display/110/002; type=boolean; label=Show Similarity Score
+        # Display the MLT similarity score on each suggestion card.
+        showScore = 0
+
+        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Show Content Type Badge
+        # Display a badge indicating the content type (Page, News, etc.).
+        showContentType = 1
+    }
+
+    view {
+        # cat=semantic_suggestion_solr:View/120/001; type=string; label=Template Root Path
+        templateRootPath = EXT:semantic_suggestion_solr/Resources/Private/Templates/
+
+        # cat=semantic_suggestion_solr:View/120/002; type=string; label=Partial Root Path
+        partialRootPath = EXT:semantic_suggestion_solr/Resources/Private/Partials/
+
+        # cat=semantic_suggestion_solr:View/120/003; type=string; label=Layout Root Path
+        layoutRootPath = EXT:semantic_suggestion_solr/Resources/Private/Layouts/
+    }
+}
