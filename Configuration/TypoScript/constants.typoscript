@@ -47,6 +47,20 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         # Uniquement pour le mode SMLT. Poids du score vectoriel dans le score combine (0.0 a 1.0).
         smltVectorWeight = 0.7
 
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/040; type=string; label=Score minimum (absolu)
+        # Seuil absolu : les suggestions avec un score inferieur sont masquees.
+        # Pour SMLT (scores normalises 0-1), valeurs typiques : 0.3 a 0.7.
+        # Pour MLT (scores TF-IDF bruts), valeurs plus elevees selon le corpus.
+        # 0 = pas de seuil.
+        minScore = 0
+
+        # cat=semantic_suggestion_solr:Similarity Algorithm/100/041; type=string; label=Score minimum (ratio)
+        # Seuil relatif : ratio par rapport au meilleur score (0.0 a 1.0).
+        # Ex: 0.5 = ne garder que les suggestions ayant au moins 50% du score du meilleur resultat.
+        # Fonctionne de maniere coherente en MLT comme en SMLT.
+        # 0 = pas de seuil.
+        minScoreRatio = 0
+
         # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Types de contenus autorises
         # Liste de types Solr autorises (separes par des virgules). Si vide, tous les types sont affiches.
         # Peut etre surcharge par instance de plugin via le FlexForm.

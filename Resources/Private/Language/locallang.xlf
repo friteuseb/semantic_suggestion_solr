@@ -69,6 +69,12 @@
             <trans-unit id="flexform.similarityMode.smlt" resname="flexform.similarityMode.smlt">
                 <source>SMLT – Semantic More Like This (server-side)</source>
             </trans-unit>
+            <trans-unit id="flexform.minScoreRatio" resname="flexform.minScoreRatio">
+                <source>Minimum score ratio</source>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.description" resname="flexform.minScoreRatio.description">
+                <source>Relative threshold (0.0 to 1.0): only keep suggestions scoring at least this ratio of the top result. E.g. 0.5 = must score at least 50% of the best suggestion. 0 = no filtering.</source>
+            </trans-unit>
             <trans-unit id="mode.mlt" resname="mode.mlt">
                 <source>MLT</source>
             </trans-unit>

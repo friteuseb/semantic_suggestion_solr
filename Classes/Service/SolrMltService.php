@@ -120,6 +120,7 @@ class SolrMltService implements LoggerAwareInterface
 
             $result = $client->moreLikeThis($mltQuery);
             $suggestions = $this->parseResults($result, 'mlt');
+            $suggestions = $this->filterByMinScore($suggestions, $settings);
 
             if (!empty($settings['showImage'])) {
                 $suggestions = $this->enrichWithImages($suggestions);
@@ -184,6 +185,7 @@ class SolrMltService implements LoggerAwareInterface
             $responseData = $result->getData();
 
             $suggestions = $this->parseSmltResponse($responseData, $documentId);
+            $suggestions = $this->filterByMinScore($suggestions, $settings);
 
             if (!empty($settings['showImage'])) {
                 $suggestions = $this->enrichWithImages($suggestions);
@@ -203,9 +205,10 @@ class SolrMltService implements LoggerAwareInterface
     /**
      * Parse the semanticMoreLikeThis section from the Solr response.
      *
-     * Handles two possible response structures:
-     * 1. Keyed by source doc ID: { "semanticMoreLikeThis": { "<docId>": { "numFound": N, "docs": [...] } } }
-     * 2. Flat structure: { "semanticMoreLikeThis": { "numFound": N, "docs": [...] } }
+     * Handles three possible response structures depending on json.nl mode:
+     * 1. json.nl=flat (Solarium default): [ "docId", { "numFound": N, "docs": [...] } ]
+     * 2. json.nl=map: { "docId": { "numFound": N, "docs": [...] } }
+     * 3. Flat: { "numFound": N, "docs": [...] }
      */
     private function parseSmltResponse(array $responseData, string $sourceDocId): array
     {
@@ -215,23 +218,35 @@ class SolrMltService implements LoggerAwareInterface
             return [];
         }
 
-        // Structure keyed by source document ID (like standard MLT response)
-        if (isset($smltSection[$sourceDocId]['docs'])) {
+        $docs = null;
+
+        // json.nl=flat format: sequential array [key, value, key, value, ...]
+        if (array_is_list($smltSection)) {
+            for ($i = 0; $i + 1 < \count($smltSection); $i += 2) {
+                if (\is_array($smltSection[$i + 1]) && isset($smltSection[$i + 1]['docs'])) {
+                    $docs = $smltSection[$i + 1]['docs'];
+                    break;
+                }
+            }
+        } elseif (isset($smltSection[$sourceDocId]['docs'])) {
+            // json.nl=map keyed by source document ID
             $docs = $smltSection[$sourceDocId]['docs'];
         } elseif (isset($smltSection['docs'])) {
-            // Flat structure
+            // Flat structure (no named list wrapping)
             $docs = $smltSection['docs'];
         } else {
-            // Try first key if keyed by an unexpected ID
+            // Try first key for unexpected ID
             $firstKey = array_key_first($smltSection);
-            if (is_array($smltSection[$firstKey]) && isset($smltSection[$firstKey]['docs'])) {
+            if (\is_array($smltSection[$firstKey]) && isset($smltSection[$firstKey]['docs'])) {
                 $docs = $smltSection[$firstKey]['docs'];
-            } else {
-                $this->logger?->info('Unexpected SMLT response structure, keys: {keys}', [
-                    'keys' => implode(', ', array_keys($smltSection)),
-                ]);
-                return [];
             }
+        }
+
+        if ($docs === null) {
+            $this->logger?->info('Unexpected SMLT response structure, keys: {keys}', [
+                'keys' => implode(', ', array_keys($smltSection)),
+            ]);
+            return [];
         }
 
         $suggestions = [];
@@ -252,6 +267,49 @@ class SolrMltService implements LoggerAwareInterface
         }
 
         return $suggestions;
+    }
+
+    // ---------------------------------------------------------------
+    // Score filtering
+    // ---------------------------------------------------------------
+
+    /**
+     * Filter suggestions below the minimum score threshold.
+     *
+     * Supports two modes:
+     * - Absolute threshold (minScore): filters suggestions with score < minScore.
+     *   For SMLT (normalized 0-1), typical values: 0.3-0.7.
+     *   For MLT (raw TF-IDF), values depend on corpus size.
+     * - Relative threshold (minScoreRatio): filters suggestions with score < (topScore * ratio).
+     *   E.g. 0.5 = keep only suggestions scoring at least 50% of the best one.
+     *   Works consistently across both modes.
+     *
+     * Both can be combined; a suggestion must pass both thresholds.
+     */
+    private function filterByMinScore(array $suggestions, array $settings): array
+    {
+        $minScore = (float)($settings['minScore'] ?? 0.0);
+        $minScoreRatio = (float)($settings['minScoreRatio'] ?? 0.0);
+
+        if ($minScore <= 0.0 && $minScoreRatio <= 0.0) {
+            return $suggestions;
+        }
+
+        $topScore = 0.0;
+        if ($minScoreRatio > 0.0 && !empty($suggestions)) {
+            $topScore = (float)$suggestions[0]['score'];
+        }
+
+        return array_values(array_filter($suggestions, static function (array $s) use ($minScore, $minScoreRatio, $topScore) {
+            $score = (float)$s['score'];
+            if ($minScore > 0.0 && $score < $minScore) {
+                return false;
+            }
+            if ($minScoreRatio > 0.0 && $topScore > 0.0 && $score < ($topScore * $minScoreRatio)) {
+                return false;
+            }
+            return true;
+        }));
     }
 
     // ---------------------------------------------------------------
