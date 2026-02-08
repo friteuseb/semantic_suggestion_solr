@@ -27,6 +27,106 @@
                 <source>News</source>
                 <target>Nachricht</target>
             </trans-unit>
+            <trans-unit id="flexform.sheet.general" resname="flexform.sheet.general">
+                <source>Settings</source>
+                <target>Einstellungen</target>
+            </trans-unit>
+            <trans-unit id="flexform.sheet.display" resname="flexform.sheet.display">
+                <source>Display</source>
+                <target>Anzeige</target>
+            </trans-unit>
+            <trans-unit id="flexform.sheet.advanced" resname="flexform.sheet.advanced">
+                <source>Advanced</source>
+                <target>Erweitert</target>
+            </trans-unit>
+            <trans-unit id="flexform.maxResults" resname="flexform.maxResults">
+                <source>Maximum number of suggestions</source>
+                <target>Maximale Anzahl der Vorschläge</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes" resname="flexform.allowedTypes">
+                <source>Allowed content types</source>
+                <target>Erlaubte Inhaltstypen</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.description" resname="flexform.allowedTypes.description">
+                <source>If none selected, all indexed content types are shown.</source>
+                <target>Wenn keiner ausgewählt ist, werden alle indexierten Inhaltstypen angezeigt.</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.pages" resname="flexform.allowedTypes.pages">
+                <source>Pages</source>
+                <target>Seiten</target>
+            </trans-unit>
+            <trans-unit id="flexform.allowedTypes.news" resname="flexform.allowedTypes.news">
+                <source>News articles</source>
+                <target>News-Beiträge</target>
+            </trans-unit>
+            <trans-unit id="flexform.filterByPids" resname="flexform.filterByPids">
+                <source>Restrict to pages / storage folders</source>
+                <target>Auf Seiten / Speicherordner beschränken</target>
+            </trans-unit>
+            <trans-unit id="flexform.filterByPids.description" resname="flexform.filterByPids.description">
+                <source>Only show suggestions from these locations. For pages: select the parent page. For news/records: select the storage folder. Leave empty for no restriction.</source>
+                <target>Nur Vorschläge von diesen Speicherorten anzeigen. Für Seiten: die übergeordnete Seite auswählen. Für News/Datensätze: den Speicherordner auswählen. Leer lassen für keine Einschränkung.</target>
+            </trans-unit>
+            <trans-unit id="flexform.showScore" resname="flexform.showScore">
+                <source>Show relevance score</source>
+                <target>Relevanz-Score anzeigen</target>
+            </trans-unit>
+            <trans-unit id="flexform.showContentType" resname="flexform.showContentType">
+                <source>Show content type badge</source>
+                <target>Inhaltstyp-Badge anzeigen</target>
+            </trans-unit>
+            <trans-unit id="flexform.showImage" resname="flexform.showImage">
+                <source>Show image</source>
+                <target>Bild anzeigen</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode" resname="flexform.similarityMode">
+                <source>Similarity algorithm</source>
+                <target>Ähnlichkeitsalgorithmus</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.description" resname="flexform.similarityMode.description">
+                <source>Auto = detects EXT:solr vector search config (recommended). MLT = lexical (TF-IDF, no model needed). SMLT = Semantic MLT (server-side hybrid combining MLT + vector search via Solr component, requires SMLT JAR).</source>
+                <target>Auto = erkennt die EXT:solr Vektorsuch-Konfiguration (empfohlen). MLT = lexikalisch (TF-IDF, kein Modell nötig). SMLT = Semantisches MLT (serverseitiger Hybrid aus MLT + Vektorsuche via Solr-Komponente, erfordert SMLT-JAR).</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.auto" resname="flexform.similarityMode.auto">
+                <source>Auto – detect from EXT:solr config (recommended)</source>
+                <target>Auto – aus EXT:solr-Konfiguration erkennen (empfohlen)</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.mlt" resname="flexform.similarityMode.mlt">
+                <source>MLT – More Like This (lexical)</source>
+                <target>MLT – More Like This (lexikalisch)</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.smlt" resname="flexform.similarityMode.smlt">
+                <source>SMLT – Semantic More Like This (server-side)</source>
+                <target>SMLT – Semantisches More Like This (serverseitig)</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio" resname="flexform.minScoreRatio">
+                <source>Relevance filter</source>
+                <target>Relevanzfilter</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.description" resname="flexform.minScoreRatio.description">
+                <source>Filter out suggestions that are too far from the best match. A stricter filter keeps only the most relevant suggestions.</source>
+                <target>Vorschläge herausfiltern, die zu weit vom besten Treffer entfernt sind. Ein strengerer Filter behält nur die relevantesten Vorschläge.</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.none" resname="flexform.minScoreRatio.none">
+                <source>None – show all suggestions</source>
+                <target>Keiner – alle Vorschläge anzeigen</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.low" resname="flexform.minScoreRatio.low">
+                <source>Low – at least 30% of best score</source>
+                <target>Niedrig – mindestens 30% des besten Scores</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.medium" resname="flexform.minScoreRatio.medium">
+                <source>Medium – at least 50% of best score</source>
+                <target>Mittel – mindestens 50% des besten Scores</target>
+            </trans-unit>
+            <trans-unit id="flexform.minScoreRatio.strict" resname="flexform.minScoreRatio.strict">
+                <source>Strict – at least 70% of best score</source>
+                <target>Streng – mindestens 70% des besten Scores</target>
+            </trans-unit>
+            <trans-unit id="flexform.showScore.description" resname="flexform.showScore.description">
+                <source>Debug mode: displays the similarity score and algorithm badge on each suggestion card.</source>
+                <target>Debug-Modus: zeigt den Ähnlichkeits-Score und den Algorithmus-Badge auf jeder Vorschlagskarte an.</target>
+            </trans-unit>
             <trans-unit id="mode.label" resname="mode.label">
                 <source>Mode:</source>
                 <target>Modus:</target>
