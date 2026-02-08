@@ -8,6 +8,7 @@ use Cywolf\SemanticSuggestionSolr\Service\SimilarityCacheService;
 use Cywolf\SemanticSuggestionSolr\Service\SolrMltService;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
 /**
@@ -26,6 +27,10 @@ class SuggestionsController extends ActionController
      */
     public function listAction(): ResponseInterface
     {
+        if (!$this->isCurrentPageAllowed()) {
+            return $this->htmlResponse('');
+        }
+
         $pageId = $this->resolveCurrentPageId();
         $languageUid = $this->resolveLanguageUid();
         $newsUid = $this->resolveNewsUid();
@@ -95,5 +100,43 @@ class SuggestionsController extends ActionController
         }
 
         return 0;
+    }
+
+    /**
+     * Check if the current page is allowed to show suggestions based on
+     * includePageTrees / excludePageTrees settings.
+     *
+     * Both settings accept comma-separated parent page UIDs. A page "matches"
+     * a tree if the parent UID appears anywhere in the page's rootline
+     * (i.e. the page itself OR any ancestor).
+     *
+     * Logic:
+     *   - excludePageTrees always wins (checked first)
+     *   - includePageTrees empty = show everywhere (minus excludes)
+     *   - includePageTrees set  = show only in those trees
+     */
+    private function isCurrentPageAllowed(): bool
+    {
+        $pageInformation = $this->request->getAttribute('frontend.page.information');
+        if ($pageInformation === null) {
+            return true;
+        }
+
+        $rootLine = $pageInformation->getRootLine();
+        $rootLineUids = array_map('intval', array_column($rootLine, 'uid'));
+
+        // Exclude takes priority
+        $excludePids = GeneralUtility::intExplode(',', (string)($this->settings['excludePageTrees'] ?? ''), true);
+        if (!empty($excludePids) && array_intersect($excludePids, $rootLineUids) !== []) {
+            return false;
+        }
+
+        // Include: empty = everywhere, set = whitelist
+        $includePids = GeneralUtility::intExplode(',', (string)($this->settings['includePageTrees'] ?? ''), true);
+        if (!empty($includePids) && array_intersect($includePids, $rootLineUids) === []) {
+            return false;
+        }
+
+        return true;
     }
 }

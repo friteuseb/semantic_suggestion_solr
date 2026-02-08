@@ -27,6 +27,7 @@
 # =============================================================================
 
 # customsubcategory=100=General
+# customsubcategory=105=Visibility (page trees)
 # customsubcategory=110=Display
 # customsubcategory=120=MLT tuning (expert)
 # customsubcategory=130=SMLT tuning (expert)
@@ -46,6 +47,12 @@ plugin.tx_semanticsuggestionsolr_suggestions {
 
         # cat=semantic_suggestion_solr:General/100/004; type=string; label=Minimum score (absolute): hard floor below which suggestions are hidden. SMLT range: 0-1 (try 0.3-0.7), MLT range: depends on corpus. 0 = off. Prefer ratio above in most cases
         minScore = 0
+
+        # cat=semantic_suggestion_solr:Visibility (page trees)/105/001; type=string; label=Show only in these page trees (include): comma-separated parent page UIDs. The parent page AND all its subpages will show suggestions. Empty = show on all pages (default)
+        includePageTrees =
+
+        # cat=semantic_suggestion_solr:Visibility (page trees)/105/002; type=string; label=Never show in these page trees (exclude): comma-separated parent page UIDs. These pages and their subpages will never show suggestions, even if matched by the include list. Useful for excluding specific branches like the homepage
+        excludePageTrees =
 
         # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Allowed content types: comma-separated Solr types (pages, tx_news_domain_model_news). Empty = show all types
         allowedTypes =

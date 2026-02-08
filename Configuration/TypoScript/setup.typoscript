@@ -32,6 +32,8 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         smltVectorWeight = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.smltVectorWeight}
         minScore = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.minScore}
         minScoreRatio = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.minScoreRatio}
+        includePageTrees = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.includePageTrees}
+        excludePageTrees = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.excludePageTrees}
     }
 }
 
