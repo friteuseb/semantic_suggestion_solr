@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace CyrilMarchand\SemanticSuggestionSolr\Controller;
 
+use CyrilMarchand\SemanticSuggestionSolr\Service\SimilarityCacheService;
 use CyrilMarchand\SemanticSuggestionSolr\Service\SolrMltService;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 
 /**
@@ -15,6 +17,8 @@ class SuggestionsController extends ActionController
 {
     public function __construct(
         private readonly SolrMltService $solrMltService,
+        private readonly SimilarityCacheService $similarityCacheService,
+        private readonly SiteFinder $siteFinder,
     ) {}
 
     /**
@@ -39,6 +43,19 @@ class SuggestionsController extends ActionController
                 $this->settings,
                 $languageUid
             );
+        }
+
+        // Persist page-type suggestions for page_link_insights visualization
+        if ($newsUid === 0 && $pageId > 0 && !empty($suggestions)) {
+            try {
+                $site = $this->siteFinder->getSiteByPageId($pageId);
+                $rootPageId = $site->getRootPageId();
+            } catch (\Throwable) {
+                $rootPageId = 0;
+            }
+            if ($rootPageId > 0) {
+                $this->similarityCacheService->persist($pageId, $rootPageId, $languageUid, $suggestions);
+            }
         }
 
         $this->view->assignMultiple([

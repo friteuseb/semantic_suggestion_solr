@@ -16,4 +16,10 @@ return function (ContainerConfigurator $configurator, ContainerBuilder $containe
 
     $services->set(CyrilMarchand\SemanticSuggestionSolr\Controller\SuggestionsController::class)
         ->public(true);
+
+    $services->set(CyrilMarchand\SemanticSuggestionSolr\Command\UpdateSimilaritiesCommand::class)
+        ->tag('console.command', [
+            'command' => 'semantic-suggestion-solr:update-similarities',
+            'schedulable' => true,
+        ]);
 };
