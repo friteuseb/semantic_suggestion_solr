@@ -1,3 +1,31 @@
+# =============================================================================
+# EXT:semantic_suggestion_solr – TypoScript Constants
+# =============================================================================
+#
+# This extension displays "Related content" suggestions below pages and news
+# articles by querying Apache Solr for similar documents.
+#
+# It supports two similarity algorithms:
+#
+#   MLT  (More Like This)
+#        Finds documents sharing the same words (TF-IDF lexical matching).
+#        Fast, works out of the box, no AI model needed.
+#
+#   SMLT (Semantic More Like This)
+#        A custom Solr SearchComponent that combines classical MLT with
+#        KNN vector search on pre-indexed embeddings. This finds documents
+#        that share the same *meaning*, even when the wording is different.
+#        Requires the SMLT JAR deployed in Solr and a DenseVectorField
+#        with stored=true in the schema.
+#
+# The scoring formula for SMLT is:
+#   combinedScore = (mltWeight × mltScore) + (vectorWeight × vectorScore)
+#
+# All settings below can be overridden per plugin instance via FlexForm.
+# The Constant Editor groups them into clear categories.
+#
+# =============================================================================
+
 # customsubcategory=100=General
 # customsubcategory=110=Display
 # customsubcategory=120=MLT tuning (expert)
@@ -6,65 +34,222 @@
 
 plugin.tx_semanticsuggestionsolr_suggestions {
     settings {
+
+        # ------------------------------------------------------------------
+        # GENERAL – Core algorithm and quality settings
+        # ------------------------------------------------------------------
+
         # cat=semantic_suggestion_solr:General/100/001; type=options[auto,mlt,smlt]; label=Similarity mode
-        # auto (recommended): uses SMLT when vector search is enabled, MLT otherwise.
-        # mlt: lexical similarity (TF-IDF). Fast, no AI model needed.
-        # smlt: Semantic MLT. Combines MLT + vector search server-side (requires SMLT JAR in Solr).
+        #
+        # Which algorithm to use for finding similar content:
+        #
+        #   auto  (recommended) – Automatically picks SMLT when EXT:solr has
+        #         vector search enabled (plugin.tx_solr.search.query.type >= 1),
+        #         and falls back to MLT otherwise.
+        #
+        #   mlt   – Classic lexical matching via TF-IDF. Compares word overlap
+        #         between documents. Works immediately, no extra setup needed.
+        #         Good baseline but misses synonyms and paraphrases.
+        #
+        #   smlt  – Semantic More Like This. Runs both MLT and KNN vector
+        #         search server-side, then merges the scores. Catches meaning
+        #         similarity beyond exact word matches. Requires the SMLT JAR
+        #         deployed in Solr and embeddings pre-computed at index time.
+        #
         similarityMode = auto
 
         # cat=semantic_suggestion_solr:General/100/002; type=int+; label=Maximum number of suggestions
+        #
+        # How many suggestion cards to show. Solr returns this many results;
+        # the actual count may be lower after relevance filtering (see below).
+        #
+        # Typical values: 3 for a sidebar, 6 for a full-width section.
+        #
         maxResults = 6
 
         # cat=semantic_suggestion_solr:General/100/003; type=string; label=Relevance filter (ratio 0.0–1.0)
-        # Only keep suggestions scoring at least this ratio of the best result.
-        # 0 = no filtering. 0.5 = at least 50% of the best score. 0.7 = strict.
+        #
+        # Relative quality gate: only keep suggestions whose score reaches
+        # at least this fraction of the top result's score.
+        #
+        # Example: if the best suggestion scores 0.80 and minScoreRatio = 0.5,
+        # any suggestion below 0.40 is hidden.
+        #
+        # This works consistently in both MLT and SMLT modes because it
+        # compares against the best result, not an absolute number.
+        #
+        #   0   = disabled (show all results from Solr)
+        #   0.3 = lenient  (removes only very weak matches)
+        #   0.5 = balanced (removes the bottom half)
+        #   0.7 = strict   (keeps only close matches)
+        #
         minScoreRatio = 0
 
         # cat=semantic_suggestion_solr:General/100/004; type=string; label=Minimum score (absolute)
-        # Absolute threshold: hide suggestions below this score. 0 = disabled.
-        # SMLT (0–1 range): typical 0.3–0.7. MLT (raw TF-IDF): depends on corpus.
+        #
+        # Absolute quality gate: hide any suggestion with a score below this
+        # value. Unlike minScoreRatio, this uses the raw score so the useful
+        # range differs between modes:
+        #
+        #   SMLT scores are normalized to 0–1 → typical threshold: 0.3–0.7
+        #   MLT  scores are raw TF-IDF       → values depend on corpus size
+        #
+        # In most cases, minScoreRatio (above) is easier to use because it
+        # adapts automatically. Use minScore only when you need a hard floor.
+        #
+        #   0 = disabled
+        #
         minScore = 0
 
+        # ------------------------------------------------------------------
+        # DISPLAY – What to show on each suggestion card
+        # ------------------------------------------------------------------
+
         # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Allowed content types
-        # Comma-separated Solr types. Empty = all types.
+        #
+        # Restrict suggestions to specific Solr document types.
+        # Comma-separated list. Leave empty to show all indexed types.
+        #
+        # Available types depend on your Solr index queue configuration:
+        #   pages                        – TYPO3 pages
+        #   tx_news_domain_model_news    – EXT:news articles
+        #
+        # Example: pages,tx_news_domain_model_news
+        #
         allowedTypes =
 
         # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Excluded content types
-        # Comma-separated Solr types to exclude. Only used if allowed types is empty.
+        #
+        # Hide suggestions of specific types. Comma-separated list.
+        # Only used when "Allowed content types" above is empty.
+        #
+        # Example: tx_news_domain_model_news (to hide news from suggestions)
+        #
         excludeContentTypes =
 
         # cat=semantic_suggestion_solr:Display/110/003; type=string; label=Restrict to page/folder PIDs
-        # Comma-separated UIDs. Empty = no restriction.
+        #
+        # Only show suggestions from specific locations in the page tree.
+        # Comma-separated UIDs of pages or storage folders.
+        #
+        #   For pages: use the UID of the parent page (e.g. 86)
+        #   For news:  use the UID of the storage folder (e.g. 129)
+        #
+        # You can combine both: filterByPids = 86,129
+        # Leave empty for no restriction.
+        #
         filterByPids =
 
         # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Show images
+        #
+        # Display the first media image of each suggested page or news article.
+        # Uses the "media" field for pages and "fal_media" for news.
+        #
         showImage = 1
 
         # cat=semantic_suggestion_solr:Display/110/005; type=boolean; label=Show content type badge
+        #
+        # Display a small badge (e.g. "Page", "News") on each card so users
+        # can tell the content type at a glance. Useful when mixing pages
+        # and news in the same suggestion list.
+        #
         showContentType = 1
 
         # cat=semantic_suggestion_solr:Display/110/006; type=boolean; label=Show score (debug)
+        #
+        # Debug mode: show the raw similarity score and the algorithm badge
+        # (MLT or SMLT) on each card. Useful during setup to verify that
+        # suggestions are relevant. Disable for production.
+        #
         showScore = 0
 
+        # ------------------------------------------------------------------
+        # MLT TUNING (expert) – Fine-tune the lexical matching
+        # ------------------------------------------------------------------
+        # These settings control Solr's built-in MoreLikeThis handler.
+        # The defaults work well for most sites. Only change these if you
+        # understand TF-IDF scoring and have tested the impact.
+        # ------------------------------------------------------------------
+
         # cat=semantic_suggestion_solr:MLT tuning (expert)/120/001; type=int+; label=Min term frequency
+        #
+        # A word must appear at least this many times in the source document
+        # to be used for comparison. Raising this ignores rare/typo words.
+        #
         minTermFreq = 1
 
         # cat=semantic_suggestion_solr:MLT tuning (expert)/120/002; type=int+; label=Min document frequency
+        #
+        # A word must appear in at least this many documents across the index
+        # to be used. Raising this ignores corpus-wide rare terms.
+        #
         minDocFreq = 1
 
         # cat=semantic_suggestion_solr:MLT tuning (expert)/120/003; type=string; label=MLT fields
+        #
+        # Which Solr fields to compare for lexical similarity.
+        # Comma-separated. Must be fields that exist in your Solr schema
+        # and contain text content.
+        #
         mltFields = content,title,keywords
 
         # cat=semantic_suggestion_solr:MLT tuning (expert)/120/004; type=string; label=Field boost weights
+        #
+        # How much weight each field carries in the similarity score.
+        # Format: field^weight,field^weight
+        #
+        # Higher weight = that field matters more for matching.
+        # Example: keywords^2.0 means keyword matches count double.
+        #
         boostFields = content^0.5,title^1.2,keywords^2.0
 
+        # ------------------------------------------------------------------
+        # SMLT TUNING (expert) – Fine-tune the hybrid scoring
+        # ------------------------------------------------------------------
+        # These settings control the SMLT SearchComponent running inside Solr.
+        # They only apply when similarityMode = smlt (or auto resolves to smlt).
+        #
+        # The combined score formula:
+        #   combinedScore = (smltMltWeight × mltScore) + (smltVectorWeight × vectorScore)
+        #
+        # Both scores are normalized to [0,1] before combining.
+        # The default 0.3/0.7 split favors semantic (vector) similarity
+        # over lexical (word) matching.
+        # ------------------------------------------------------------------
+
         # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/001; type=options[hybrid,vector_only,mlt_only]; label=SMLT internal mode
+        #
+        # How the SMLT component combines its two signals:
+        #
+        #   hybrid      – (default) Uses both MLT and vector scores.
+        #                 Best overall quality.
+        #
+        #   vector_only – Only uses KNN vector similarity.
+        #                 Purely semantic, ignores word overlap.
+        #
+        #   mlt_only    – Only uses classical MLT inside the SMLT component.
+        #                 Same as regular MLT but via the SMLT response format.
+        #                 Useful for A/B testing against hybrid mode.
+        #
         smltMode = hybrid
 
         # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/002; type=string; label=SMLT MLT weight (0.0–1.0)
+        #
+        # How much the lexical (word) score contributes to the combined score.
+        # Lower = less influence from word matching.
+        #
+        # Default 0.3 = MLT contributes 30% of the final score.
+        #
         smltMltWeight = 0.3
 
         # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/003; type=string; label=SMLT vector weight (0.0–1.0)
+        #
+        # How much the semantic (embedding) score contributes to the combined score.
+        # Higher = more influence from meaning similarity.
+        #
+        # Default 0.7 = vector search contributes 70% of the final score.
+        # smltMltWeight + smltVectorWeight should ideally equal 1.0.
+        #
         smltVectorWeight = 0.7
     }
 
