@@ -12,12 +12,12 @@ return function (ContainerConfigurator $configurator, ContainerBuilder $containe
         ->autoconfigure()
         ->public(false);
 
-    $services->load('CyrilMarchand\\SemanticSuggestionSolr\\', '../Classes/*');
+    $services->load('Cywolf\\SemanticSuggestionSolr\\', '../Classes/*');
 
-    $services->set(CyrilMarchand\SemanticSuggestionSolr\Controller\SuggestionsController::class)
+    $services->set(Cywolf\SemanticSuggestionSolr\Controller\SuggestionsController::class)
         ->public(true);
 
-    $services->set(CyrilMarchand\SemanticSuggestionSolr\Command\UpdateSimilaritiesCommand::class)
+    $services->set(Cywolf\SemanticSuggestionSolr\Command\UpdateSimilaritiesCommand::class)
         ->tag('console.command', [
             'command' => 'semantic-suggestion-solr:update-similarities',
             'schedulable' => true,

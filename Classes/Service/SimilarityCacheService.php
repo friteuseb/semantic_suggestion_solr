@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CyrilMarchand\SemanticSuggestionSolr\Service;
+namespace Cywolf\SemanticSuggestionSolr\Service;
 
 use TYPO3\CMS\Core\Database\ConnectionPool;
 

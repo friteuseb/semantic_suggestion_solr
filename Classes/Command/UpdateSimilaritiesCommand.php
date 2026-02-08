@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CyrilMarchand\SemanticSuggestionSolr\Command;
+namespace Cywolf\SemanticSuggestionSolr\Command;
 
-use CyrilMarchand\SemanticSuggestionSolr\Service\SimilarityCacheService;
-use CyrilMarchand\SemanticSuggestionSolr\Service\SolrMltService;
+use Cywolf\SemanticSuggestionSolr\Service\SimilarityCacheService;
+use Cywolf\SemanticSuggestionSolr\Service\SolrMltService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

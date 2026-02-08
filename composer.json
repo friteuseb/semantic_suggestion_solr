@@ -1,12 +1,12 @@
 {
-    "name": "cyrilmarchand/semantic-suggestion-solr",
+    "name": "cywolf/semantic-suggestion-solr",
     "version": "1.0.0",
     "type": "typo3-cms-extension",
     "description": "TYPO3 extension for suggesting semantically related content using Solr More Like This (MLT)",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Cyril Marchand",
+            "name": "Cyril Wolfangel",
             "email": "cyril.wolfangel@gmail.com"
         }
     ],
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "CyrilMarchand\\SemanticSuggestionSolr\\": "Classes/"
+            "Cywolf\\SemanticSuggestionSolr\\": "Classes/"
         }
     },
     "extra": {

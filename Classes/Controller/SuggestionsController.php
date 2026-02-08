@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace CyrilMarchand\SemanticSuggestionSolr\Controller;
+namespace Cywolf\SemanticSuggestionSolr\Controller;
 
-use CyrilMarchand\SemanticSuggestionSolr\Service\SimilarityCacheService;
-use CyrilMarchand\SemanticSuggestionSolr\Service\SolrMltService;
+use Cywolf\SemanticSuggestionSolr\Service\SimilarityCacheService;
+use Cywolf\SemanticSuggestionSolr\Service\SolrMltService;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;

@@ -62,7 +62,7 @@ When `showImage = 1`, the extension resolves the first media file for each sugge
 ## Installation
 
 ```bash
-composer require cyrilmarchand/semantic-suggestion-solr:@dev
+composer require cywolf/semantic-suggestion-solr:@dev
 ```
 
 Flush TYPO3 caches, then include the extension's static TypoScript in the site template.
@@ -186,7 +186,7 @@ page.10.variables.semanticSuggestionsSolr {
     userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
     extensionName = SemanticSuggestionSolr
     pluginName = Suggestions
-    vendorName = CyrilMarchand
+    vendorName = Cywolf
     view < plugin.tx_semanticsuggestionsolr_suggestions.view
     settings < plugin.tx_semanticsuggestionsolr_suggestions.settings
     settings.maxResults = 3

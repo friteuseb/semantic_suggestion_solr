@@ -2,7 +2,7 @@
 
 defined('TYPO3') or die();
 
-use CyrilMarchand\SemanticSuggestionSolr\Controller\SuggestionsController;
+use Cywolf\SemanticSuggestionSolr\Controller\SuggestionsController;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
 (static function () {

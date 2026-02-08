@@ -44,7 +44,7 @@ lib.semantic_suggestion_solr {
     userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
     extensionName = SemanticSuggestionSolr
     pluginName = Suggestions
-    vendorName = CyrilMarchand
+    vendorName = Cywolf
 
     view =< plugin.tx_semanticsuggestionsolr_suggestions.view
     settings =< plugin.tx_semanticsuggestionsolr_suggestions.settings
