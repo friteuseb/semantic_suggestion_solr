@@ -2,7 +2,73 @@
     <sheets>
         <sDEF>
             <ROOT>
-                <sheetTitle>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.sheet.general</sheetTitle>
+                <sheetTitle>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.sheet.display</sheetTitle>
+                <type>array</type>
+                <el>
+                    <settings.maxResults>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.maxResults</label>
+                        <config>
+                            <type>number</type>
+                            <default>6</default>
+                            <range>
+                                <lower>1</lower>
+                                <upper>30</upper>
+                            </range>
+                            <slider>
+                                <step>1</step>
+                                <width>200</width>
+                            </slider>
+                        </config>
+                    </settings.maxResults>
+                    <settings.allowedTypes>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes</label>
+                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.description</description>
+                        <config>
+                            <type>select</type>
+                            <renderType>selectCheckBox</renderType>
+                            <items>
+                                <numIndex index="0">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.pages</label>
+                                    <value>pages</value>
+                                </numIndex>
+                                <numIndex index="1">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.news</label>
+                                    <value>tx_news_domain_model_news</value>
+                                </numIndex>
+                            </items>
+                        </config>
+                    </settings.allowedTypes>
+                    <settings.filterByPids>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.filterByPids</label>
+                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.filterByPids.description</description>
+                        <config>
+                            <type>group</type>
+                            <allowed>pages</allowed>
+                            <size>3</size>
+                            <maxitems>10</maxitems>
+                            <minitems>0</minitems>
+                        </config>
+                    </settings.filterByPids>
+                    <settings.showImage>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showImage</label>
+                        <config>
+                            <type>check</type>
+                            <default>1</default>
+                        </config>
+                    </settings.showImage>
+                    <settings.showContentType>
+                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showContentType</label>
+                        <config>
+                            <type>check</type>
+                            <default>1</default>
+                        </config>
+                    </settings.showContentType>
+                </el>
+            </ROOT>
+        </sDEF>
+        <sAdvanced>
+            <ROOT>
+                <sheetTitle>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.sheet.advanced</sheetTitle>
                 <type>array</type>
                 <el>
                     <settings.similarityMode>
@@ -27,82 +93,42 @@
                             </items>
                         </config>
                     </settings.similarityMode>
-                    <settings.maxResults>
-                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.maxResults</label>
-                        <config>
-                            <type>number</type>
-                            <default>6</default>
-                            <range>
-                                <lower>1</lower>
-                                <upper>30</upper>
-                            </range>
-                        </config>
-                    </settings.maxResults>
-                    <settings.allowedTypes>
-                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes</label>
-                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.description</description>
-                        <config>
-                            <type>select</type>
-                            <renderType>selectCheckBox</renderType>
-                            <items>
-                                <numIndex index="0">
-                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.pages</label>
-                                    <value>pages</value>
-                                </numIndex>
-                                <numIndex index="1">
-                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.allowedTypes.news</label>
-                                    <value>tx_news_domain_model_news</value>
-                                </numIndex>
-                            </items>
-                        </config>
-                    </settings.allowedTypes>
                     <settings.minScoreRatio>
                         <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio</label>
                         <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio.description</description>
                         <config>
-                            <type>number</type>
-                            <format>decimal</format>
-                            <default>0</default>
-                            <range>
-                                <lower>0</lower>
-                                <upper>1</upper>
-                            </range>
+                            <type>select</type>
+                            <renderType>selectSingle</renderType>
+                            <items>
+                                <numIndex index="0">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio.none</label>
+                                    <value>0</value>
+                                </numIndex>
+                                <numIndex index="1">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio.low</label>
+                                    <value>0.3</value>
+                                </numIndex>
+                                <numIndex index="2">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio.medium</label>
+                                    <value>0.5</value>
+                                </numIndex>
+                                <numIndex index="3">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.minScoreRatio.strict</label>
+                                    <value>0.7</value>
+                                </numIndex>
+                            </items>
                         </config>
                     </settings.minScoreRatio>
-                    <settings.filterByPids>
-                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.filterByPids</label>
-                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.filterByPids.description</description>
-                        <config>
-                            <type>group</type>
-                            <allowed>pages</allowed>
-                            <size>3</size>
-                            <maxitems>10</maxitems>
-                            <minitems>0</minitems>
-                        </config>
-                    </settings.filterByPids>
-                    <settings.showContentType>
-                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showContentType</label>
-                        <config>
-                            <type>check</type>
-                            <default>1</default>
-                        </config>
-                    </settings.showContentType>
                     <settings.showScore>
                         <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showScore</label>
+                        <description>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showScore.description</description>
                         <config>
                             <type>check</type>
                             <default>0</default>
                         </config>
                     </settings.showScore>
-                    <settings.showImage>
-                        <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.showImage</label>
-                        <config>
-                            <type>check</type>
-                            <default>1</default>
-                        </config>
-                    </settings.showImage>
                 </el>
             </ROOT>
-        </sDEF>
+        </sAdvanced>
     </sheets>
 </T3DataStructure>

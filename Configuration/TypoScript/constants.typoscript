@@ -1,105 +1,81 @@
-# customsubcategory=100=Similarity Algorithm
-# customsubcategory=110=Display Settings
-# customsubcategory=120=View Configuration
+# customsubcategory=100=General
+# customsubcategory=110=Display
+# customsubcategory=120=MLT tuning (expert)
+# customsubcategory=130=SMLT tuning (expert)
+# customsubcategory=140=View paths
 
 plugin.tx_semanticsuggestionsolr_suggestions {
     settings {
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/001; type=options[auto,mlt,smlt]; label=Mode de similarite
-        # Algorithme utilise pour trouver les contenus similaires :
-        # - auto : (recommande) Detecte automatiquement si la recherche vectorielle EXT:solr est
-        #          activee (plugin.tx_solr.search.query.type >= 1). Si oui, utilise SMLT, sinon MLT.
-        # - mlt : MLT = More Like This. Compare les mots-cles (TF-IDF). Rapide, pas besoin de modele IA.
-        # - smlt : SMLT = Semantic More Like This. Combine MLT + KNN cote Solr via un SearchComponent
-        #          dedie. Necessite le JAR SMLT deploye dans Solr et un DenseVectorField (stored=true).
+        # cat=semantic_suggestion_solr:General/100/001; type=options[auto,mlt,smlt]; label=Similarity mode
+        # auto (recommended): uses SMLT when vector search is enabled, MLT otherwise.
+        # mlt: lexical similarity (TF-IDF). Fast, no AI model needed.
+        # smlt: Semantic MLT. Combines MLT + vector search server-side (requires SMLT JAR in Solr).
         similarityMode = auto
 
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/002; type=int+; label=Nombre max de suggestions
+        # cat=semantic_suggestion_solr:General/100/002; type=int+; label=Maximum number of suggestions
         maxResults = 6
 
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/010; type=int+; label=MLT : Frequence minimum du terme
-        # Uniquement pour le mode MLT.
-        minTermFreq = 1
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/011; type=int+; label=MLT : Frequence minimum dans le corpus
-        # Uniquement pour le mode MLT.
-        minDocFreq = 1
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/012; type=string; label=MLT : Champs compares
-        # Uniquement pour le mode MLT.
-        mltFields = content,title,keywords
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/013; type=string; label=MLT : Poids des champs
-        # Uniquement pour le mode MLT.
-        boostFields = content^0.5,title^1.2,keywords^2.0
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/030; type=options[hybrid,vector_only,mlt_only]; label=SMLT : Mode interne
-        # Uniquement pour le mode SMLT. Algorithme utilise cote Solr :
-        # - hybrid : (defaut) Combine MLT + vectoriel (score = mltWeight*MLT + vectorWeight*KNN)
-        # - vector_only : Recherche vectorielle uniquement
-        # - mlt_only : MLT classique uniquement (utile pour A/B testing)
-        smltMode = hybrid
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/031; type=string; label=SMLT : Poids MLT
-        # Uniquement pour le mode SMLT. Poids du score MLT dans le score combine (0.0 a 1.0).
-        smltMltWeight = 0.3
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/032; type=string; label=SMLT : Poids vectoriel
-        # Uniquement pour le mode SMLT. Poids du score vectoriel dans le score combine (0.0 a 1.0).
-        smltVectorWeight = 0.7
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/040; type=string; label=Score minimum (absolu)
-        # Seuil absolu : les suggestions avec un score inferieur sont masquees.
-        # Pour SMLT (scores normalises 0-1), valeurs typiques : 0.3 a 0.7.
-        # Pour MLT (scores TF-IDF bruts), valeurs plus elevees selon le corpus.
-        # 0 = pas de seuil.
-        minScore = 0
-
-        # cat=semantic_suggestion_solr:Similarity Algorithm/100/041; type=string; label=Score minimum (ratio)
-        # Seuil relatif : ratio par rapport au meilleur score (0.0 a 1.0).
-        # Ex: 0.5 = ne garder que les suggestions ayant au moins 50% du score du meilleur resultat.
-        # Fonctionne de maniere coherente en MLT comme en SMLT.
-        # 0 = pas de seuil.
+        # cat=semantic_suggestion_solr:General/100/003; type=string; label=Relevance filter (ratio 0.0–1.0)
+        # Only keep suggestions scoring at least this ratio of the best result.
+        # 0 = no filtering. 0.5 = at least 50% of the best score. 0.7 = strict.
         minScoreRatio = 0
 
-        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Types de contenus autorises
-        # Liste de types Solr autorises (separes par des virgules). Si vide, tous les types sont affiches.
-        # Peut etre surcharge par instance de plugin via le FlexForm.
+        # cat=semantic_suggestion_solr:General/100/004; type=string; label=Minimum score (absolute)
+        # Absolute threshold: hide suggestions below this score. 0 = disabled.
+        # SMLT (0–1 range): typical 0.3–0.7. MLT (raw TF-IDF): depends on corpus.
+        minScore = 0
+
+        # cat=semantic_suggestion_solr:Display/110/001; type=string; label=Allowed content types
+        # Comma-separated Solr types. Empty = all types.
         allowedTypes =
 
-        # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Types de contenus exclus
-        # Liste de types Solr a exclure (separes par des virgules). Utilise seulement si "Types autorises" est vide.
+        # cat=semantic_suggestion_solr:Display/110/002; type=string; label=Excluded content types
+        # Comma-separated Solr types to exclude. Only used if allowed types is empty.
         excludeContentTypes =
 
-        # cat=semantic_suggestion_solr:Display/110/006; type=string; label=Filtrer par pages/dossiers (PIDs)
-        # UIDs de pages parentes ou dossiers de stockage (separes par des virgules).
-        # Seules les suggestions dont le PID correspond seront affichees.
-        # - Pour les pages : pid = UID de la page parente dans l'arborescence (ex: 86)
-        # - Pour les news : pid = UID du dossier de stockage (ex: 42)
-        # Combinable : filterByPids = 86,42 renvoie les pages sous 86 ET les news du dossier 42.
-        # Vide = aucune restriction.
+        # cat=semantic_suggestion_solr:Display/110/003; type=string; label=Restrict to page/folder PIDs
+        # Comma-separated UIDs. Empty = no restriction.
         filterByPids =
 
-        # cat=semantic_suggestion_solr:Display/110/003; type=boolean; label=Afficher le score de similarite
-        # Affiche le score de similarite sur chaque carte de suggestion (utile pour le debug/comparaison).
-        showScore = 0
+        # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Show images
+        showImage = 1
 
-        # cat=semantic_suggestion_solr:Display/110/004; type=boolean; label=Afficher le badge de type
-        # Affiche un badge indiquant le type de contenu (Page, News, etc.).
+        # cat=semantic_suggestion_solr:Display/110/005; type=boolean; label=Show content type badge
         showContentType = 1
 
-        # cat=semantic_suggestion_solr:Display/110/005; type=boolean; label=Afficher l'image
-        # Affiche la premiere image media de chaque suggestion.
-        showImage = 1
+        # cat=semantic_suggestion_solr:Display/110/006; type=boolean; label=Show score (debug)
+        showScore = 0
+
+        # cat=semantic_suggestion_solr:MLT tuning (expert)/120/001; type=int+; label=Min term frequency
+        minTermFreq = 1
+
+        # cat=semantic_suggestion_solr:MLT tuning (expert)/120/002; type=int+; label=Min document frequency
+        minDocFreq = 1
+
+        # cat=semantic_suggestion_solr:MLT tuning (expert)/120/003; type=string; label=MLT fields
+        mltFields = content,title,keywords
+
+        # cat=semantic_suggestion_solr:MLT tuning (expert)/120/004; type=string; label=Field boost weights
+        boostFields = content^0.5,title^1.2,keywords^2.0
+
+        # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/001; type=options[hybrid,vector_only,mlt_only]; label=SMLT internal mode
+        smltMode = hybrid
+
+        # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/002; type=string; label=SMLT MLT weight (0.0–1.0)
+        smltMltWeight = 0.3
+
+        # cat=semantic_suggestion_solr:SMLT tuning (expert)/130/003; type=string; label=SMLT vector weight (0.0–1.0)
+        smltVectorWeight = 0.7
     }
 
     view {
-        # cat=semantic_suggestion_solr:View/120/001; type=string; label=Template Root Path
+        # cat=semantic_suggestion_solr:View paths/140/001; type=string; label=Template Root Path
         templateRootPath = EXT:semantic_suggestion_solr/Resources/Private/Templates/
 
-        # cat=semantic_suggestion_solr:View/120/002; type=string; label=Partial Root Path
+        # cat=semantic_suggestion_solr:View paths/140/002; type=string; label=Partial Root Path
         partialRootPath = EXT:semantic_suggestion_solr/Resources/Private/Partials/
 
-        # cat=semantic_suggestion_solr:View/120/003; type=string; label=Layout Root Path
+        # cat=semantic_suggestion_solr:View paths/140/003; type=string; label=Layout Root Path
         layoutRootPath = EXT:semantic_suggestion_solr/Resources/Private/Layouts/
     }
 }

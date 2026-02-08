@@ -1,0 +1,32 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<div class="card h-100">
+    <f:if condition="{settings.showImage} == 1 && {suggestion.image}">
+        <div class="card-img-top">
+            <f:image image="{suggestion.image}" width="410c" height="280c" class="img-fluid" loading="lazy" alt="" />
+        </div>
+    </f:if>
+    <div class="card-body">
+        <f:if condition="{settings.showContentType} == 1">
+            <span class="badge bg-secondary mb-2">
+                <f:translate key="type.{suggestion.type}" extensionName="SemanticSuggestionSolr" default="{suggestion.typeLabel}" />
+            </span>
+        </f:if>
+        <h5 class="card-title">
+            <a href="{suggestion.url}">{suggestion.title}</a>
+        </h5>
+        <f:if condition="{suggestion.snippet}">
+            <p class="card-text">{suggestion.snippet}</p>
+        </f:if>
+        <f:if condition="{settings.showScore} == 1">
+            <p class="card-text">
+                <small class="text-muted">
+                    <f:translate key="score.label" extensionName="SemanticSuggestionSolr" /> : <f:format.number decimals="4">{suggestion.score}</f:format.number>
+                </small>
+            </p>
+        </f:if>
+    </div>
+    <div class="card-footer">
+        <a href="{suggestion.url}" class="btn btn-primary btn-sm"><f:translate key="button.view" extensionName="SemanticSuggestionSolr" /></a>
+    </div>
+</div>
+</html>
