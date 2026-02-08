@@ -7,18 +7,11 @@
                     <div class="frame-header">
                         <h2 class="element-header"><f:translate key="heading" extensionName="SemanticSuggestionSolr" /></h2>
                     </div>
-                    <f:if condition="{settings.showScore} == 1">
+                    <f:if condition="{settings.showScore} == 1 && {suggestions.0.mode}">
                         <p class="text-muted mb-2">
                             <small>
                                 Mode :
-                                <f:if condition="{settings.similarityMode}">
-                                    <f:then>
-                                        <span class="badge bg-info"><f:translate key="mode.{settings.similarityMode}" extensionName="SemanticSuggestionSolr" default="{settings.similarityMode}" /></span>
-                                    </f:then>
-                                    <f:else>
-                                        <span class="badge bg-info">MLT</span>
-                                    </f:else>
-                                </f:if>
+                                <span class="badge bg-info"><f:translate key="mode.{suggestions.0.mode}" extensionName="SemanticSuggestionSolr" default="{suggestions.0.mode}" /></span>
                             </small>
                         </p>
                     </f:if>

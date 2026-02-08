@@ -58,25 +58,22 @@
                 <source>Similarity algorithm</source>
             </trans-unit>
             <trans-unit id="flexform.similarityMode.description" resname="flexform.similarityMode.description">
-                <source>MLT = lexical (TF-IDF, no model needed). KNN = semantic (requires LLM model in Solr). Hybrid = both combined.</source>
+                <source>Auto = detects EXT:solr vector search config (recommended). MLT = lexical (TF-IDF, no model needed). SMLT = Semantic MLT (server-side hybrid combining MLT + vector search via Solr component, requires SMLT JAR).</source>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.auto" resname="flexform.similarityMode.auto">
+                <source>Auto – detect from EXT:solr config (recommended)</source>
             </trans-unit>
             <trans-unit id="flexform.similarityMode.mlt" resname="flexform.similarityMode.mlt">
                 <source>MLT – More Like This (lexical)</source>
             </trans-unit>
-            <trans-unit id="flexform.similarityMode.knn" resname="flexform.similarityMode.knn">
-                <source>KNN – Vector search (semantic)</source>
-            </trans-unit>
-            <trans-unit id="flexform.similarityMode.hybrid" resname="flexform.similarityMode.hybrid">
-                <source>Hybrid – MLT + KNN combined</source>
+            <trans-unit id="flexform.similarityMode.smlt" resname="flexform.similarityMode.smlt">
+                <source>SMLT – Semantic More Like This (server-side)</source>
             </trans-unit>
             <trans-unit id="mode.mlt" resname="mode.mlt">
                 <source>MLT</source>
             </trans-unit>
-            <trans-unit id="mode.knn" resname="mode.knn">
-                <source>KNN</source>
-            </trans-unit>
-            <trans-unit id="mode.hybrid" resname="mode.hybrid">
-                <source>Hybrid</source>
+            <trans-unit id="mode.smlt" resname="mode.smlt">
+                <source>SMLT</source>
             </trans-unit>
         </body>
     </file>

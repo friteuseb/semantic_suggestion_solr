@@ -13,16 +13,16 @@
                             <renderType>selectSingle</renderType>
                             <items>
                                 <numIndex index="0">
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.similarityMode.auto</label>
+                                    <value>auto</value>
+                                </numIndex>
+                                <numIndex index="1">
                                     <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.similarityMode.mlt</label>
                                     <value>mlt</value>
                                 </numIndex>
-                                <numIndex index="1">
-                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.similarityMode.knn</label>
-                                    <value>knn</value>
-                                </numIndex>
                                 <numIndex index="2">
-                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.similarityMode.hybrid</label>
-                                    <value>hybrid</value>
+                                    <label>LLL:EXT:semantic_suggestion_solr/Resources/Private/Language/locallang.xlf:flexform.similarityMode.smlt</label>
+                                    <value>smlt</value>
                                 </numIndex>
                             </items>
                         </config>

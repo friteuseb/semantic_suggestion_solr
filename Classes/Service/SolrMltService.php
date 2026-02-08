@@ -10,10 +10,24 @@ use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Resource\FileReference;
 use TYPO3\CMS\Core\Resource\FileRepository;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
 /**
  * Service for querying Solr to find similar documents.
- * Supports MLT (More Like This), KNN (vector/semantic) and hybrid modes.
+ *
+ * Supports two modes:
+ *  - MLT (More Like This): lexical similarity via TF-IDF. No model needed.
+ *  - SMLT (Semantic More Like This): a custom Solr SearchComponent that
+ *    combines classical MLT with KNN vector search on pre-indexed embeddings.
+ *    Returns results in a separate "semanticMoreLikeThis" response section.
+ *    Requires the SMLT JAR deployed in Solr and a DenseVectorField with
+ *    stored=true in the schema.
+ *
+ * In "auto" mode (default), the algorithm is chosen automatically:
+ *  - SMLT if vector search is enabled (plugin.tx_solr.search.query.type >= 1)
+ *  - MLT otherwise
+ *
+ * @see https://docs.typo3.org/p/apache-solr-for-typo3/solr/main/en-us/Configuration/Reference/TxSolrSearch.html
  */
 class SolrMltService implements LoggerAwareInterface
 {
@@ -23,6 +37,7 @@ class SolrMltService implements LoggerAwareInterface
         private readonly ConnectionManager $connectionManager,
         private readonly SiteFinder $siteFinder,
         private readonly FileRepository $fileRepository,
+        private readonly ConfigurationManagerInterface $configurationManager,
     ) {}
 
     /**
@@ -35,17 +50,36 @@ class SolrMltService implements LoggerAwareInterface
 
     /**
      * Find similar documents for any indexed content type.
-     * Routes to the appropriate algorithm based on settings.similarityMode.
+     *
+     * When similarityMode is "auto" (default), the algorithm is chosen
+     * based on EXT:solr's query.type setting:
+     *  - query.type >= 1 -> SMLT (vector search is enabled, embeddings are indexed)
+     *  - query.type = 0  -> MLT (no vectors available)
      */
     public function findSimilarByType(string $type, int $uid, array $settings, int $languageUid = 0): array
     {
-        $mode = $settings['similarityMode'] ?? 'mlt';
+        $mode = $settings['similarityMode'] ?? 'auto';
+
+        if ($mode === 'auto') {
+            $mode = $this->isVectorSearchEnabled() ? 'smlt' : 'mlt';
+        }
 
         return match ($mode) {
-            'knn' => $this->findSimilarByKnn($type, $uid, $settings, $languageUid),
-            'hybrid' => $this->findSimilarHybrid($type, $uid, $settings, $languageUid),
+            'smlt' => $this->findSimilarBySmlt($type, $uid, $settings, $languageUid),
             default => $this->findSimilarByMlt($type, $uid, $settings, $languageUid),
         };
+    }
+
+    /**
+     * Check if EXT:solr's vector search is enabled (query.type >= 1).
+     */
+    private function isVectorSearchEnabled(): bool
+    {
+        $typoScript = $this->configurationManager->getConfiguration(
+            ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
+        );
+
+        return (int)($typoScript['plugin.']['tx_solr.']['search.']['query.']['type'] ?? 0) > 0;
     }
 
     // ---------------------------------------------------------------
@@ -103,49 +137,53 @@ class SolrMltService implements LoggerAwareInterface
     }
 
     // ---------------------------------------------------------------
-    // KNN (K-Nearest Neighbors) – semantic similarity via vectors
-    // Requires an LLM model configured in Solr's model store.
+    // SMLT (Semantic More Like This) – Solr SearchComponent combining
+    // classical MLT (TF-IDF) with KNN vector search server-side.
+    // Requires the SMLT JAR deployed as last-component on the handler.
     // ---------------------------------------------------------------
 
-    private function findSimilarByKnn(string $type, int $uid, array $settings, int $languageUid): array
+    private function findSimilarBySmlt(string $type, int $uid, array $settings, int $languageUid): array
     {
         try {
             $rootPageId = $this->resolveRootPageId($uid);
             $connection = $this->connectionManager->getConnectionByRootPageId($rootPageId, $languageUid);
             $client = $connection->getReadService()->getClient();
 
-            // Retrieve the source document content to use as KNN query text
-            $sourceText = $this->resolveDocumentContent($client, $type, $uid);
-            if ($sourceText === null) {
-                $this->logger?->info('No content found for KNN query, type={type} uid={uid}', [
+            $documentId = $this->resolveDocumentId($client, $type, $uid);
+            if ($documentId === null) {
+                $this->logger?->info('No Solr document found for SMLT, type={type} uid={uid}', [
                     'type' => $type,
                     'uid' => $uid,
                 ]);
                 return [];
             }
 
-            $topK = (int)($settings['vectorTopK'] ?? 50);
             $maxResults = (int)($settings['maxResults'] ?? 6);
-            $modelName = $settings['vectorModelName'] ?? 'llm';
+            $smltMode = $settings['smltMode'] ?? 'hybrid';
+            $mltWeight = (float)($settings['smltMltWeight'] ?? 0.3);
+            $vectorWeight = (float)($settings['smltVectorWeight'] ?? 0.7);
 
             $select = $client->createSelect();
-            $helper = $select->getHelper();
+            // Main query is not relevant; SMLT component provides its own results
+            $select->setQuery('*:*');
+            $select->setRows(0);
 
-            // Build the KNN text-to-vector query via Solarium helper
-            $knnQueryStr = $helper->knnTextToVector($modelName, 'vector', $sourceText, $topK);
-            $select->setQuery($knnQueryStr);
-            $select->setRows($maxResults);
-            $select->setFields(['*', 'score']);
+            // SMLT SearchComponent parameters
+            $select->addParam('smlt', 'true');
+            $select->addParam('smlt.id', $documentId);
+            $select->addParam('smlt.count', (string)$maxResults);
+            $select->addParam('smlt.mode', $smltMode);
+            $select->addParam('smlt.mltWeight', (string)$mltWeight);
+            $select->addParam('smlt.vectorWeight', (string)$vectorWeight);
 
-            // Exclude the source document itself
-            $select->createFilterQuery('excludeSelf')
-                ->setQuery(sprintf('-(type:%s AND uid:%d)', $this->escapeQueryValue($type), $uid));
-
+            // Apply filter queries so SMLT respects type/pid restrictions
             $this->applyTypeFilters($select, $settings);
             $this->applyPidFilter($select, $settings);
 
             $result = $client->select($select);
-            $suggestions = $this->parseResults($result, 'knn');
+            $responseData = $result->getData();
+
+            $suggestions = $this->parseSmltResponse($responseData, $documentId);
 
             if (!empty($settings['showImage'])) {
                 $suggestions = $this->enrichWithImages($suggestions);
@@ -153,7 +191,7 @@ class SolrMltService implements LoggerAwareInterface
 
             return $suggestions;
         } catch (\Throwable $e) {
-            $this->logger?->error('Solr KNN query failed: {message}', [
+            $this->logger?->error('Solr SMLT query failed: {message}', [
                 'message' => $e->getMessage(),
                 'type' => $type,
                 'uid' => $uid,
@@ -162,81 +200,58 @@ class SolrMltService implements LoggerAwareInterface
         }
     }
 
-    // ---------------------------------------------------------------
-    // Hybrid – combines MLT (lexical) and KNN (semantic) results
-    // ---------------------------------------------------------------
-
-    private function findSimilarHybrid(string $type, int $uid, array $settings, int $languageUid): array
-    {
-        // Request more results from each sub-query to have enough after merging
-        $maxResults = (int)($settings['maxResults'] ?? 6);
-        $subSettings = $settings;
-        $subSettings['maxResults'] = $maxResults * 2;
-
-        $mltResults = $this->findSimilarByMlt($type, $uid, $subSettings, $languageUid);
-        $knnResults = $this->findSimilarByKnn($type, $uid, $subSettings, $languageUid);
-
-        return $this->mergeResults($mltResults, $knnResults, $maxResults);
-    }
-
     /**
-     * Merge MLT and KNN results with normalized combined scoring.
-     * MLT weight = 0.4, KNN weight = 0.6 (semantic similarity weighted higher).
+     * Parse the semanticMoreLikeThis section from the Solr response.
+     *
+     * Handles two possible response structures:
+     * 1. Keyed by source doc ID: { "semanticMoreLikeThis": { "<docId>": { "numFound": N, "docs": [...] } } }
+     * 2. Flat structure: { "semanticMoreLikeThis": { "numFound": N, "docs": [...] } }
      */
-    private function mergeResults(array $mltResults, array $knnResults, int $maxResults): array
+    private function parseSmltResponse(array $responseData, string $sourceDocId): array
     {
-        $mltResults = $this->normalizeScores($mltResults);
-        $knnResults = $this->normalizeScores($knnResults);
-
-        $merged = [];
-
-        foreach ($mltResults as $r) {
-            $key = $r['type'] . ':' . $r['uid'];
-            $merged[$key] = $r;
-            $merged[$key]['mltScore'] = $r['score'];
-            $merged[$key]['knnScore'] = 0.0;
-            $merged[$key]['mode'] = 'mlt';
-        }
-
-        foreach ($knnResults as $r) {
-            $key = $r['type'] . ':' . $r['uid'];
-            if (isset($merged[$key])) {
-                $merged[$key]['knnScore'] = $r['score'];
-                $merged[$key]['mode'] = 'hybrid';
-            } else {
-                $merged[$key] = $r;
-                $merged[$key]['mltScore'] = 0.0;
-                $merged[$key]['knnScore'] = $r['score'];
-                $merged[$key]['mode'] = 'knn';
-            }
-        }
-
-        // Combined score: MLT 40% + KNN 60%
-        foreach ($merged as &$item) {
-            $item['score'] = 0.4 * $item['mltScore'] + 0.6 * $item['knnScore'];
-        }
-
-        usort($merged, fn(array $a, array $b) => $b['score'] <=> $a['score']);
-
-        return array_slice($merged, 0, $maxResults);
-    }
-
-    private function normalizeScores(array $results): array
-    {
-        if (empty($results)) {
+        $smltSection = $responseData['semanticMoreLikeThis'] ?? [];
+        if (empty($smltSection)) {
+            $this->logger?->info('No semanticMoreLikeThis section in Solr response');
             return [];
         }
 
-        $maxScore = max(array_column($results, 'score'));
-        if ($maxScore <= 0) {
-            return $results;
+        // Structure keyed by source document ID (like standard MLT response)
+        if (isset($smltSection[$sourceDocId]['docs'])) {
+            $docs = $smltSection[$sourceDocId]['docs'];
+        } elseif (isset($smltSection['docs'])) {
+            // Flat structure
+            $docs = $smltSection['docs'];
+        } else {
+            // Try first key if keyed by an unexpected ID
+            $firstKey = array_key_first($smltSection);
+            if (is_array($smltSection[$firstKey]) && isset($smltSection[$firstKey]['docs'])) {
+                $docs = $smltSection[$firstKey]['docs'];
+            } else {
+                $this->logger?->info('Unexpected SMLT response structure, keys: {keys}', [
+                    'keys' => implode(', ', array_keys($smltSection)),
+                ]);
+                return [];
+            }
         }
 
-        foreach ($results as &$r) {
-            $r['score'] = $r['score'] / $maxScore;
+        $suggestions = [];
+        foreach ($docs as $doc) {
+            $docType = $doc['type'] ?? 'pages';
+            $suggestions[] = [
+                'title' => $doc['title'] ?? '',
+                'url' => $doc['url'] ?? '',
+                'type' => $docType,
+                'typeLabel' => $this->buildTypeLabel($docType),
+                'score' => (float)($doc['combinedScore'] ?? $doc['score'] ?? 0.0),
+                'mltScore' => (float)($doc['mltScore'] ?? 0.0),
+                'knnScore' => (float)($doc['vectorScore'] ?? 0.0),
+                'snippet' => $this->buildSnippetFromString($doc['content'] ?? ''),
+                'uid' => (int)($doc['uid'] ?? 0),
+                'mode' => 'smlt',
+            ];
         }
 
-        return $results;
+        return $suggestions;
     }
 
     // ---------------------------------------------------------------
@@ -263,45 +278,8 @@ class SolrMltService implements LoggerAwareInterface
         return null;
     }
 
-    /**
-     * Retrieve title + content of a Solr document to use as KNN query text.
-     * Truncated to 2000 chars to stay within embedding model limits.
-     */
-    private function resolveDocumentContent(object $client, string $type, int $uid): ?string
-    {
-        $select = $client->createSelect();
-        $select->setQuery(sprintf('type:%s AND uid:%d', $this->escapeQueryValue($type), $uid));
-        $select->setFields('title,content');
-        $select->setRows(1);
-
-        $result = $client->select($select);
-
-        if ($result->getNumFound() === 0) {
-            return null;
-        }
-
-        foreach ($result as $doc) {
-            $title = $doc->title ?? '';
-            $content = $doc->content ?? '';
-            if (is_array($content)) {
-                $content = implode(' ', $content);
-            }
-            $content = strip_tags((string)$content);
-            $content = preg_replace('/\s+/', ' ', $content);
-
-            $text = trim($title . ' ' . $content);
-            // Truncate for embedding model input limits
-            if (mb_strlen($text) > 2000) {
-                $text = mb_substr($text, 0, 2000);
-            }
-            return $text ?: null;
-        }
-
-        return null;
-    }
-
     // ---------------------------------------------------------------
-    // Filter helpers (shared by MLT and KNN queries)
+    // Filter helpers (shared by MLT and SMLT queries)
     // ---------------------------------------------------------------
 
     private function applyTypeFilters(object $query, array $settings): void
@@ -379,7 +357,12 @@ class SolrMltService implements LoggerAwareInterface
             $content = implode(' ', $content);
         }
 
-        $content = strip_tags((string)$content);
+        return $this->buildSnippetFromString((string)$content);
+    }
+
+    private function buildSnippetFromString(string $content): string
+    {
+        $content = strip_tags($content);
         $content = preg_replace('/\s+/', ' ', $content);
         $content = trim($content);
 

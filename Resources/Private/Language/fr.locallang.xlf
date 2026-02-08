@@ -76,32 +76,28 @@
                 <target>Algorithme de similarite</target>
             </trans-unit>
             <trans-unit id="flexform.similarityMode.description" resname="flexform.similarityMode.description">
-                <source>MLT = lexical (TF-IDF, no model needed). KNN = semantic (requires LLM model in Solr). Hybrid = both combined.</source>
-                <target>MLT = lexical (TF-IDF, pas de modele). KNN = semantique (modele LLM requis dans Solr). Hybride = les deux combines.</target>
+                <source>Auto = detects EXT:solr vector search config (recommended). MLT = lexical (TF-IDF, no model needed). SMLT = Semantic MLT (server-side hybrid combining MLT + vector search via Solr component, requires SMLT JAR).</source>
+                <target>Auto = detecte la config vectorielle EXT:solr (recommande). MLT = lexical (TF-IDF, pas de modele). SMLT = MLT semantique (hybride cote Solr combinant MLT + recherche vectorielle via composant dedie, necessite le JAR SMLT).</target>
+            </trans-unit>
+            <trans-unit id="flexform.similarityMode.auto" resname="flexform.similarityMode.auto">
+                <source>Auto – detect from EXT:solr config (recommended)</source>
+                <target>Auto – detection depuis la config EXT:solr (recommande)</target>
             </trans-unit>
             <trans-unit id="flexform.similarityMode.mlt" resname="flexform.similarityMode.mlt">
                 <source>MLT – More Like This (lexical)</source>
                 <target>MLT – More Like This (lexical)</target>
             </trans-unit>
-            <trans-unit id="flexform.similarityMode.knn" resname="flexform.similarityMode.knn">
-                <source>KNN – Vector search (semantic)</source>
-                <target>KNN – Recherche vectorielle (semantique)</target>
-            </trans-unit>
-            <trans-unit id="flexform.similarityMode.hybrid" resname="flexform.similarityMode.hybrid">
-                <source>Hybrid – MLT + KNN combined</source>
-                <target>Hybride – MLT + KNN combines</target>
+            <trans-unit id="flexform.similarityMode.smlt" resname="flexform.similarityMode.smlt">
+                <source>SMLT – Semantic More Like This (server-side)</source>
+                <target>SMLT – More Like This semantique (cote Solr)</target>
             </trans-unit>
             <trans-unit id="mode.mlt" resname="mode.mlt">
                 <source>MLT</source>
                 <target>MLT</target>
             </trans-unit>
-            <trans-unit id="mode.knn" resname="mode.knn">
-                <source>KNN</source>
-                <target>KNN</target>
-            </trans-unit>
-            <trans-unit id="mode.hybrid" resname="mode.hybrid">
-                <source>Hybrid</source>
-                <target>Hybride</target>
+            <trans-unit id="mode.smlt" resname="mode.smlt">
+                <source>SMLT</source>
+                <target>SMLT</target>
             </trans-unit>
         </body>
     </file>

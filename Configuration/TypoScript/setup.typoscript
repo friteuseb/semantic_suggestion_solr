@@ -27,9 +27,9 @@ plugin.tx_semanticsuggestionsolr_suggestions {
         showContentType = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showContentType}
         showImage = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.showImage}
         similarityMode = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.similarityMode}
-        vectorTopK = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorTopK}
-        vectorMinSimilarity = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorMinSimilarity}
-        vectorModelName = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.vectorModelName}
+        smltMode = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.smltMode}
+        smltMltWeight = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.smltMltWeight}
+        smltVectorWeight = {$plugin.tx_semanticsuggestionsolr_suggestions.settings.smltVectorWeight}
     }
 }
 
