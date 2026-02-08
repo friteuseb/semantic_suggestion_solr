@@ -176,6 +176,9 @@ class SolrMltService implements LoggerAwareInterface
             $select->addParam('smlt.mode', $smltMode);
             $select->addParam('smlt.mltWeight', (string)$mltWeight);
             $select->addParam('smlt.vectorWeight', (string)$vectorWeight);
+            $select->addParam('smlt.fl', 'id,title,url,type,uid,pid,content');
+            $select->addParam('smlt.vectorField', $settings['smltVectorField'] ?? 'vector');
+            $select->addParam('smlt.mltFields', $settings['mltFields'] ?? 'content,title,keywords');
 
             // Apply filter queries so SMLT respects type/pid restrictions
             $this->applyTypeFilters($select, $settings);
