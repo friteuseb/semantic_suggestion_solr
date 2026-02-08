@@ -96,6 +96,9 @@
             <trans-unit id="flexform.showScore.description" resname="flexform.showScore.description">
                 <source>Debug mode: displays the similarity score and algorithm badge on each suggestion card.</source>
             </trans-unit>
+            <trans-unit id="mode.label" resname="mode.label">
+                <source>Mode:</source>
+            </trans-unit>
             <trans-unit id="mode.mlt" resname="mode.mlt">
                 <source>MLT</source>
             </trans-unit>

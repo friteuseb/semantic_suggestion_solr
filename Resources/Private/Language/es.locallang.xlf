@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="es" datatype="plaintext" original="messages" date="2025-01-01T00:00:00Z" product-name="semantic_suggestion_solr">
+        <header/>
+        <body>
+            <trans-unit id="plugin.title" resname="plugin.title">
+                <source>Similar content (Solr)</source>
+                <target>Contenido similar (Solr)</target>
+            </trans-unit>
+            <trans-unit id="heading" resname="heading">
+                <source>Related content</source>
+                <target>Contenido relacionado</target>
+            </trans-unit>
+            <trans-unit id="button.view" resname="button.view">
+                <source>Read more</source>
+                <target>Leer más</target>
+            </trans-unit>
+            <trans-unit id="score.label" resname="score.label">
+                <source>Relevance</source>
+                <target>Relevancia</target>
+            </trans-unit>
+            <trans-unit id="type.pages" resname="type.pages">
+                <source>Page</source>
+                <target>Página</target>
+            </trans-unit>
+            <trans-unit id="type.tx_news_domain_model_news" resname="type.tx_news_domain_model_news">
+                <source>News</source>
+                <target>Noticia</target>
+            </trans-unit>
+            <trans-unit id="mode.label" resname="mode.label">
+                <source>Mode:</source>
+                <target>Modo:</target>
+            </trans-unit>
+            <trans-unit id="mode.mlt" resname="mode.mlt">
+                <source>MLT</source>
+                <target>MLT</target>
+            </trans-unit>
+            <trans-unit id="mode.smlt" resname="mode.smlt">
+                <source>SMLT</source>
+                <target>SMLT</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

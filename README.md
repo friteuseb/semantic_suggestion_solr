@@ -196,6 +196,8 @@ page.10.variables.semanticSuggestionsSolr {
 
 Then render `{semanticSuggestionsSolr -> f:format.raw()}` in your page layout.
 
+Use `includePageTrees` / `excludePageTrees` to control which page trees show suggestions (see [Visibility](#visibility) below).
+
 ## Configuration
 
 ### TypoScript constants
@@ -226,6 +228,24 @@ All settings under `plugin.tx_semanticsuggestionsolr_suggestions.settings`.
 | `smltMltWeight` | `0.3` | Weight for MLT score in hybrid mode (0.0-1.0) |
 | `smltVectorWeight` | `0.7` | Weight for vector score in hybrid mode (0.0-1.0) |
 
+#### Visibility
+
+Control which page trees show suggestions. Both settings accept comma-separated parent page UIDs. A page "matches" a tree when the parent UID appears anywhere in its rootline (the page itself or any ancestor). This works identically across all site languages.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `includePageTrees` | *(empty)* | Show only in these page trees. Empty = show everywhere (default). Example: `130,42` |
+| `excludePageTrees` | *(empty)* | Never show in these page trees. Exclude takes priority over include. Example: `1,95` |
+
+Example: show suggestions only in the News section (page 130) and Blog (page 42), but never on the Legal page (135):
+
+```typoscript
+plugin.tx_semanticsuggestionsolr_suggestions.settings {
+    includePageTrees = 130,42
+    excludePageTrees = 135
+}
+```
+
 #### Display
 
 | Setting | Default | Description |
@@ -240,6 +260,14 @@ All settings under `plugin.tx_semanticsuggestionsolr_suggestions.settings`.
 ### FlexForm vs TypoScript
 
 FlexForm settings (per content element) override TypoScript settings for the same keys.
+
+### Multi-language support
+
+The extension is fully multi-language aware:
+
+- **Solr cores**: EXT:solr maintains one core per site language. The plugin reads the current frontend language from the request and connects to the matching core automatically. Results are always in the same language as the current page.
+- **Visibility settings**: `includePageTrees` / `excludePageTrees` use page UIDs which are identical across all languages (TYPO3 translations are overlays on the same page records).
+- **Frontend labels**: Translated into English, French, German, Spanish and Italian. Add your own by creating `Resources/Private/Language/{iso}.locallang.xlf`.
 
 ## Architecture
 
@@ -256,10 +284,15 @@ Configuration/
         setup.typoscript                    Plugin setup + rendering definition
 Resources/Private/
     Language/
-        locallang.xlf                       English labels
-        fr.locallang.xlf                    French labels
+        locallang.xlf                       English labels (source)
+        fr.locallang.xlf                    French
+        de.locallang.xlf                    German
+        es.locallang.xlf                    Spanish
+        it.locallang.xlf                    Italian
     Templates/Suggestions/
         List.html                           Fluid template (Bootstrap cards)
+    Partials/Suggestions/
+        Card.html                           Single suggestion card
 ```
 
 ### SMLT Solr SearchComponent

@@ -127,6 +127,10 @@
                 <source>Debug mode: displays the similarity score and algorithm badge on each suggestion card.</source>
                 <target>Mode debug : affiche le score de similarite et le badge d'algorithme sur chaque carte de suggestion.</target>
             </trans-unit>
+            <trans-unit id="mode.label" resname="mode.label">
+                <source>Mode:</source>
+                <target>Mode :</target>
+            </trans-unit>
             <trans-unit id="mode.mlt" resname="mode.mlt">
                 <source>MLT</source>
                 <target>MLT</target>

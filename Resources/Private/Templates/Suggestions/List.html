@@ -10,7 +10,7 @@
                     <f:if condition="{settings.showScore} == 1 && {suggestions.0.mode}">
                         <p class="text-muted mb-2">
                             <small>
-                                Mode :
+                                <f:translate key="mode.label" extensionName="SemanticSuggestionSolr" />
                                 <span class="badge bg-info"><f:translate key="mode.{suggestions.0.mode}" extensionName="SemanticSuggestionSolr" default="{suggestions.0.mode}" /></span>
                             </small>
                         </p>
