@@ -5,6 +5,15 @@ Toutes les modifications notables de cette extension sont documentées dans ce f
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 et le projet adhère au [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.0.0-beta.2] - 2026-06-15
+
+### Modifié
+
+- `composer.json` : suppression du champ `version` figé (les versions sont
+  désormais pilotées par les tags git, recommandation Packagist).
+- `composer.json` : ajout des métadonnées `keywords`, `homepage` et `support`
+  pour le référencement Packagist / TER.
+
 ## [1.0.0-beta.1] - 2026-06-15
 
 Première livraison publique (bêta).
@@ -33,4 +42,5 @@ Première livraison publique (bêta).
 - Le mode SMLT nécessite le build et le déploiement du JAR du composant Solr
   (`smlt-plugin`) ainsi que l'indexation des embeddings — voir le README.
 
+[1.0.0-beta.2]: https://github.com/friteuseb/semantic_suggestion_solr/releases/tag/v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/friteuseb/semantic_suggestion_solr/releases/tag/v1.0.0-beta.1

@@ -1,9 +1,25 @@
 {
     "name": "cywolf/semantic-suggestion-solr",
-    "version": "1.0.0-beta.1",
     "type": "typo3-cms-extension",
     "description": "TYPO3 extension for suggesting semantically related content using Solr More Like This (MLT) and Semantic More Like This (SMLT)",
     "license": "GPL-2.0-or-later",
+    "keywords": [
+        "typo3",
+        "solr",
+        "more-like-this",
+        "mlt",
+        "semantic-search",
+        "vector-search",
+        "knn",
+        "recommendations",
+        "related-content",
+        "tx-news"
+    ],
+    "homepage": "https://github.com/friteuseb/semantic_suggestion_solr",
+    "support": {
+        "issues": "https://github.com/friteuseb/semantic_suggestion_solr/issues",
+        "source": "https://github.com/friteuseb/semantic_suggestion_solr"
+    },
     "authors": [
         {
             "name": "Cyril Wolfangel",
