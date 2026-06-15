@@ -81,7 +81,7 @@ docker run --rm -v "$(pwd)/.ddev/typo3-solr/smlt-plugin":/build -w /build \
 Copy the JAR to the Solr `typo3lib` directory (alongside `solr-typo3-plugin-6.0.0.jar`):
 
 ```bash
-cp .ddev/typo3-solr/smlt-plugin/target/solr-smlt-plugin-1.0.0.jar \
+cp .ddev/typo3-solr/smlt-plugin/target/solr-semantic-mlt-1.0.0-SNAPSHOT.jar \
    vendor/apache-solr-for-typo3/solr/Resources/Private/Solr/typo3lib/
 ```
 
@@ -92,7 +92,7 @@ Add to `vendor/.../configsets/ext_solr_13_1_0/conf/solrconfig.xml`:
 ```xml
 <!-- SMLT: Semantic More Like This -->
 <searchComponent name="smlt"
-    class="fr.coconweb.solr.smlt.SemanticMoreLikeThisComponent"/>
+    class="org.apache.solr.handler.component.SemanticMoreLikeThisComponent"/>
 ```
 
 And add `<str>smlt</str>` to the `/select` handler's `<arr name="last-components">`.
@@ -228,6 +228,15 @@ All settings under `plugin.tx_semanticsuggestionsolr_suggestions.settings`.
 | `smltMltWeight` | `0.3` | Weight for MLT score in hybrid mode (0.0-1.0) |
 | `smltVectorWeight` | `0.7` | Weight for vector score in hybrid mode (0.0-1.0) |
 
+#### Relevance filtering
+
+Applies to both MLT and SMLT. Use these to drop weakly-related suggestions.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `minScoreRatio` | `0` | Keep only suggestions scoring at least X% of the best result. `0` = off, `0.3` = lenient, `0.5` = balanced, `0.7` = strict. Preferred over `minScore` in most cases. |
+| `minScore` | `0` | Absolute score floor below which suggestions are hidden. SMLT range: 0-1 (try 0.3-0.7); MLT range depends on the corpus. `0` = off. |
+
 #### Visibility
 
 Control which page trees show suggestions. Both settings accept comma-separated parent page UIDs. A page "matches" a tree when the parent UID appears anywhere in its rootline (the page itself or any ancestor). This works identically across all site languages.
@@ -299,9 +308,9 @@ Resources/Private/
 
 ```
 .ddev/typo3-solr/smlt-plugin/
-    src/main/java/fr/coconweb/solr/smlt/
+    src/main/java/org/apache/solr/handler/component/
         SemanticMoreLikeThisComponent.java  Solr SearchComponent (Java 17)
-    pom.xml                                Maven config (Solr 9.7+)
+    pom.xml                                Maven config (Solr 9.10+)
 ```
 
 Solr API parameters:

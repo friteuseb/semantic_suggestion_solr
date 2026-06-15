@@ -1,0 +1,11 @@
+# Dépendances
+/vendor/
+/node_modules/
+
+# Bases de données / artefacts d'outils (ruflo, claude-flow, etc.)
+*.db
+ruvector.db
+
+# Caches & logs
+*.log
+.DS_Store
